@@ -79,6 +79,8 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyMEPRoutingElementsResult,
     ModifyMEPSystemGroupsParameters,
     ModifyMEPSystemGroupsResult,
+    RebuildMEPRoutingElementsParameters,
+    RebuildMEPRoutingElementsResult,
     SetMEPRoutingParametersParameters,
     SetMEPRoutingParametersResult,
     TransferMEPSettingsParameters,
@@ -125,12 +127,14 @@ from multiconn_archicad.models.tapir.types import (
     MEPRoutingElementData,
     MEPRoutingElementDetails,
     MEPRoutingElementModificationData,
+    MEPRoutingElementRebuildData,
     MEPRoutingParameters,
     MEPSystemGroupData,
     MEPSystemGroupDetails,
     MEPSystemGroupIdArrayItem,
     MEPSystemGroupModificationData,
     MEPTakeOffCreationData,
+    RebuiltMEPRoutingElement,
     SuccessfulExecutionResult,
 )
 
@@ -735,7 +739,9 @@ class MepCommands:
         radius factor, insulation thickness, preference table and routing node of elbows (from
         Archicad 29), angle, length and insulation thickness of branches, and offsets, wider and
         narrower ports, insulation thickness, routing node and (from Archicad 29) preference
-        table of transitions. Available from Archicad 28.
+        table of transitions; the width and height of flexible segments, and the anchor point,
+        orientation, library part and (from Archicad 30) size of the elements ModifyMEPElements
+        places, with the keys it writes them with. Available from Archicad 28.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
@@ -908,8 +914,9 @@ class MepCommands:
         polyline, segments with cross section data (shape, size, preference table and reference
         id), begin and end nodes, anchor, reference line offsets, wall thickness, flange size,
         connection style, insulation thickness and rigid segments, and nodes with their incoming
-        and outgoing segments, preferred transition placement, elbows and transitions. Available
-        from Archicad 28.
+        and outgoing segments, preferred transition placement, elbows and transitions, and the
+        node positions with the key ModifyMEPRoutingElements writes them with. Available from
+        Archicad 28.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
@@ -1171,12 +1178,14 @@ class MepCommands:
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Modifies placed MEP elements: the anchor point, orientation and library part of
-        terminals, accessories, equipment, fittings and flexible segments, the control points,
-        polyline (Piping, from Archicad 28), and width and height of flexible segments. Only the
-        given fields are changed, in one undo step with one execution result per element; an
-        item with a field that does not fit its element changes nothing. Archicad reports a
-        'libraryPartId' it does not find only after the item's other changes were made, so that
-        item's error says which changes stayed. Available from Archicad 27.
+        terminals, accessories, equipment, fittings and flexible segments, their size along the
+        local x and y axes (from Archicad 30), the control points, polyline (Piping, from
+        Archicad 28), and width and height of flexible segments. Only the given fields are
+        changed, in one undo step with one execution result per element; an item with a field
+        that does not fit its element changes nothing. Archicad reports a 'libraryPartId' it
+        does not find, or a library part that keeps its own size, only after the item's other
+        changes were made, so that item's error says which changes stayed. The size of the
+        connections is set with ModifyMEPPorts. Available from Archicad 27.
 
         Args:
             elements (list[MEPElementModificationData]): The MEP elements to modify, each with
@@ -1237,10 +1246,10 @@ class MepCommands:
         self, ports_data: list[MEPPortModificationData]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Modifies the given MEP ports (as returned by GetMEPPorts): shape, connection style (from
-        Archicad 30), the flow direction of piping and ventilation ports, and the outer diameter
-        and nominal size (from Archicad 30) of piping ports. Only the given fields are changed.
-        Available from Archicad 28.
+        Modifies the given MEP ports (as returned by GetMEPPorts): shape, width, height (not of
+        piping ports), connection style (from Archicad 30), the flow direction of piping and
+        ventilation ports, and the outer diameter and nominal size (from Archicad 30) of piping
+        ports. Only the given fields are changed. Available from Archicad 28.
 
         Args:
             ports_data (list[MEPPortModificationData]): Array of data to modify MEP ports. Only
@@ -1394,6 +1403,62 @@ class MepCommands:
         )
         validated_response = ModifyMEPSystemGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def rebuild_mep_routing_elements(
+        self, routing_elements: list[MEPRoutingElementRebuildData]
+    ) -> list[ErrorItem | RebuiltMEPRoutingElement]:
+        """
+        Rebuilds the given MEP routing elements along new node coordinates or along their
+        current polyline: this adds or removes nodes (bend points), leaves out with
+        removeCollinearNodes the nodes where the route goes straight on (as Purge Unused MEP
+        Nodes does), and with resetCustomSegments resets customized segments and nodes (as Reset
+        Custom Segments does). Each route is deleted and placed again from its own settings,
+        under its own guid when Archicad allows it and else under a new one, which the response
+        gives. Every segment, node and fitting gets a new guid (see guidMap); labels, dimensions
+        and other things attached to them are not carried over. Use ModifyMEPRoutingElements
+        nodePositions instead when the node count stays the same: it keeps every guid. Kept:
+        each new segment gets the size (shape, width, height, reference id) and the preference
+        table, anchor, reference line offsets, wall thickness, connection style, flange size and
+        rigid segment settings (insulation) of the old segment it lies along most, and each new
+        node the transition placement and elbow and transition settings of the old node at its
+        position (a new segment along old segments of different sizes gets those of the one it
+        overlaps most, with a warning; a segment along no old segment, such as a new end, those
+        of its nearest neighbour along the route); the route's layer, home story, renovation
+        status (given to every part), element ID, classifications and the property values set on
+        it; and its connections at both ends. Not kept: the guids of the segments, rigid
+        segments, nodes, elbows and transitions; the element IDs, classifications, property
+        values and own renovation status of single parts; and the route's design option, which
+        is not set. Refused, with nothing changed: a route that ends at a tee (Branch) or has a
+        take-off on a segment, which Archicad deletes with the route. What could not be carried
+        over is listed in the item's warnings. Nothing is changed when the nodes make a segment
+        without length or the route cannot be deleted. Available from Archicad 28.
+
+        Args:
+            routing_elements (list[MEPRoutingElementRebuildData]): The routing elements to
+                rebuild. Each is deleted and placed again. Every segment, node and fitting gets
+                a new guid (see guidMap); labels, dimensions and other things attached to them
+                are not carried over. Use ModifyMEPRoutingElements nodePositions instead when
+                the node count stays the same: it keeps every guid.
+
+        Returns:
+            list[ErrorItem | RebuiltMEPRoutingElement]: One item for each given routing element,
+                in order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "routingElements": routing_elements,
+        }
+        validated_params = RebuildMEPRoutingElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RebuildMEPRoutingElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = RebuildMEPRoutingElementsResult.model_validate(response_dict)
+        return validated_response.elements
 
     def set_mep_routing_parameters(
         self, elements: list[ElementMEPRoutingParameters]

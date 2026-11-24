@@ -26,6 +26,7 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteDesignOptionsResult,
     DuplicateDesignOptionCombinationsParameters,
     DuplicateDesignOptionCombinationsResult,
+    GetDefaultDesignOptionResult,
     GetDesignOptionCombinationOfViewsParameters,
     GetDesignOptionCombinationOfViewsResult,
     GetDesignOptionCombinationsResult,
@@ -319,7 +320,10 @@ class DesignOptionsCommands:
         self, design_option_sets: list[DesignOptionSetIdArrayItem]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Deletes the given design option sets. Available from Archicad 29.
+        Deletes the given design option sets. A set with an option that still holds elements is
+        not deleted (its result is an error naming them, because Archicad would open a modal
+        dialog): move them to the main model or another option with MoveElementsToDesignOptions
+        first. Available from Archicad 29.
 
         Args:
             design_option_sets (list[DesignOptionSetIdArrayItem]): The design option sets to
@@ -349,7 +353,10 @@ class DesignOptionsCommands:
         self, design_options: list[DesignOptionIdArrayItem]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Deletes the given design options. Available from Archicad 29.
+        Deletes the given design options. An option that still holds elements is not deleted
+        (its result is an error naming them, because Archicad would open a modal dialog): move
+        them to the main model or another option with MoveElementsToDesignOptions first.
+        Available from Archicad 29.
 
         Args:
             design_options (list[DesignOptionIdArrayItem]): The design options to delete.
@@ -405,6 +412,29 @@ class DesignOptionsCommands:
         )
         validated_response = DuplicateDesignOptionCombinationsResult.model_validate(response_dict)
         return validated_response.designOptionCombinationIdsOrErrors
+
+    def get_default_design_option(self) -> GetDefaultDesignOptionResult:
+        """
+        Retrieves which design option, or the Main Model, is the default that new elements go
+        to. The Archicad API has no function for it, so in a project with design options the
+        command creates a temporary slab in the floor plan, reads its design option, moves it to
+        the Main Model and deletes it (without design options the answer is the Main Model and
+        nothing is created). Archicad puts a new element into the default design option only
+        when the undo step that created it ends, so this takes two undo steps, creating and
+        removing the slab, which together leave the project as it was. Needs a window where
+        design options can be edited. Available from Archicad 29.
+
+        Returns:
+            GetDefaultDesignOptionResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        response_dict = self._core.post_tapir_command("GetDefaultDesignOption")
+        validated_response = GetDefaultDesignOptionResult.model_validate(response_dict)
+        return validated_response
 
     def get_design_option_combination_of_views(
         self, navigator_item_ids: list[NavigatorItemIdArrayItem]

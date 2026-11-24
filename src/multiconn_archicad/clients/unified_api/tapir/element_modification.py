@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    ModifyAngleDimensionsParameters,
+    ModifyAngleDimensionsResult,
     ModifyAssociativeDimensionsParameters,
     ModifyAssociativeDimensionsResult,
     ModifyBeamsParameters,
@@ -14,10 +16,14 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyColumnsResult,
     ModifyCurtainWallFramesParameters,
     ModifyCurtainWallFramesResult,
+    ModifyCurtainWallPanelsParameters,
+    ModifyCurtainWallPanelsResult,
     ModifyCurtainWallsParameters,
     ModifyCurtainWallsResult,
     ModifyDoorsParameters,
     ModifyDoorsResult,
+    ModifyHatchesParameters,
+    ModifyHatchesResult,
     ModifyLabelsParameters,
     ModifyLabelsResult,
     ModifyLampsParameters,
@@ -32,6 +38,10 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyObjectsResult,
     ModifyOpeningsParameters,
     ModifyOpeningsResult,
+    ModifyPicturesParameters,
+    ModifyPicturesResult,
+    ModifyPolylinesParameters,
+    ModifyPolylinesResult,
     ModifyRailingsParameters,
     ModifyRailingsResult,
     ModifyRoofsParameters,
@@ -54,13 +64,19 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyZonesResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    AngleDimensionWithDetails,
     AssociativeDimensionWithDetails,
     BeamWithDetails,
     ColumnWithDetails,
     CurtainWallFrameWithDetails,
+    CurtainWallPanelWithDetails,
     CurtainWallWithDetails,
+    DatabaseId,
     DoorWithDetails,
+    ElementIdArrayItem,
+    ErrorItem,
     FailedExecutionResult,
+    HatchWithDetails,
     LabelsWithDetail,
     LampWithDetails,
     LevelDimensionsWithDetail,
@@ -68,6 +84,8 @@ from multiconn_archicad.models.tapir.types import (
     MorphWithDetails,
     ObjectWithDetails,
     OpeningsWithDetail,
+    PictureWithDetails,
+    PolylineWithDetails,
     RailingsWithDetail,
     RoofWithDetails,
     ShellWithDetails,
@@ -89,18 +107,60 @@ class ElementModificationCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
 
+    def modify_angle_dimensions(
+        self, angle_dimensions_with_details: list[AngleDimensionWithDetails]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes the settings of existing Angle Dimension elements with the keys
+        CreateAngleDimensions takes and GetDetailsOfElements returns: smallArc, the pen, and the
+        text height and pen. Only the given settings are changed. The lines and the arc position
+        cannot be changed, as Archicad keeps them: delete the dimension and create it again with
+        CreateAngleDimensions. The element is read back, so a value Archicad did not take is
+        reported as a failure.
+
+        Args:
+            angle_dimensions_with_details (list[AngleDimensionWithDetails]): The Angle
+                Dimensions to change, each with the settings to change. Only the given settings
+                are changed; the keys are those CreateAngleDimensions takes and
+                GetDetailsOfElements returns. The lines and the arc position cannot be changed:
+                Archicad keeps them as they are, so delete the dimension and create it again
+                with CreateAngleDimensions.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "angleDimensionsWithDetails": angle_dimensions_with_details,
+        }
+        validated_params = ModifyAngleDimensionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyAngleDimensions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = ModifyAngleDimensionsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_associative_dimensions(
         self, dimensions_with_details: list[AssociativeDimensionWithDetails]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Changes the settings of existing linear dimensions (the Dimension tool's elements, also
-        in sections): the dimension type, the elevation origin, the line pen, the marker type
-        and pen, the text height, pen and frame and the witness line form and value, with the
-        same keys as the dimension creation commands. The text and witness line settings are
-        applied to every witness point. Not written: the witness points, the dimension line
-        position and direction (use MoveElements), the marker size, the text content and
-        position, the witness extension line, the layout and the hole and composite wall
-        dimensioning settings.
+        in sections): the dimension type, the elevation origin and elevation marker, the line
+        pen, the marker type, pen and size, the text placement method, the text height, pen,
+        frame, font and style (bold, italic, underline) and the witness line form and value,
+        with the same keys as the dimension creation commands. The text and witness line
+        settings are applied to every witness point. witnessPointTexts sets the text of single
+        witness points: the measured value or a custom text (which can contain the measured
+        value), superscript, the text position and the reset to the automatic text position;
+        GetDetailsOfElements reads them back with the same keys. Not written: the witness
+        points, the dimension line position and direction (use MoveElements), the witness
+        extension line and the hole and composite wall dimensioning settings.
 
         Args:
             dimensions_with_details (list[AssociativeDimensionWithDetails]): The linear
@@ -133,9 +193,15 @@ class ElementModificationCommands:
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Modifies Beam elements based on the given parameters. CreateBeams takes the same cut
-        fill pens and cover fill, and the same absolute zCoordinate of the reference line (with
-        an optional floorIndex). Not written: the surfaces of the beam segments, and the cut
-        fill pens before Archicad 27.
+        fill pens, cover fill and holes, and the same absolute zCoordinate of the reference line
+        (with an optional floorIndex), and the same segments array, which changes the cross
+        section, taper and length of single segments and leaves the others as they are. Also
+        writes the floor plan display settings GetDetailsOfElements reads, under the same names:
+        story visibility, display option, view depth, uncut and overhead projection modes,
+        whether the contour lines and the reference axis are shown, and the pens and line types
+        of the cut contour, uncut, overhead, hidden and reference lines; each is read back after
+        the change, and one Archicad did not take fails the item. Not written: the surfaces of
+        the beam segments, and the cut fill pens before Archicad 27.
 
         Args:
             beams_with_details (list[BeamWithDetails])
@@ -165,8 +231,15 @@ class ElementModificationCommands:
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Modifies Column elements based on the given parameters. CreateColumns takes the same cut
-        fill pens and cover fill. Not written: the surfaces of the column segments, and the cut
-        fill pens before Archicad 27.
+        fill pens and cover fill. Also writes the floor plan display settings
+        GetDetailsOfElements reads, under the same names: story visibility, display option, view
+        depth, and the pens and line types of the contour, veneer, uncut, overhead and hidden
+        lines, and the core symbol pen; each is read back after the change, and one Archicad did
+        not take fails the item. The segments list writes a given column segment in the shape
+        GetDetailsOfElements returns it: its extrusion and ends surfaces, veneer, cross section,
+        taper and length. A column Archicad does not let you edit (its layer is hidden or
+        locked, it is locked, or it is not reserved by you in teamwork) gets a failed execution
+        result naming the reason. Not written: the cut fill pens before Archicad 27.
 
         Args:
             columns_with_details (list[ColumnWithDetails])
@@ -196,9 +269,10 @@ class ElementModificationCommands:
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         EXPERIMENTAL. Modifies single Curtain Wall Frames by their GUID: the frame contour (a1,
-        a2, b1, b2), the frame class and the frame type. ACAPI_Element_Change does not take a
-        frame on its own, so the change is written through the memo of the owner curtain wall,
-        and read back to check that Archicad applied it.
+        a2, b1, b2), the frame class and the frame type. The frame element itself is changed,
+        and read back to check that Archicad applied the change. A frame given its own contour
+        or type without a classIndex is made a customized frame (GetDetailsOfElements reports
+        its type as Custom) when Archicad does not keep the change on a frame of a class.
 
         Args:
             frames_with_details (list[CurtainWallFrameWithDetails]): Curtain Wall Frames to
@@ -225,6 +299,40 @@ class ElementModificationCommands:
         validated_response = ModifyCurtainWallFramesResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def modify_curtain_wall_panels(
+        self, panels_with_details: list[CurtainWallPanelWithDetails]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Assigns a panel class to single Curtain Wall Panels by their GUID; the panel takes the
+        settings of the class (thickness, surfaces, building material, cut line, panel type).
+        ACAPI_Element_Change does not take a panel on its own, so the change is written through
+        the memo of the owner curtain wall, and read back to check that Archicad applied it.
+
+        Args:
+            panels_with_details (list[CurtainWallPanelWithDetails]): Curtain Wall Panels to
+                modify (the GUIDs from GetSubelementsOfHierarchicalElements), with the fields to
+                change. Only the given fields are changed.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "panelsWithDetails": panels_with_details,
+        }
+        validated_params = ModifyCurtainWallPanelsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyCurtainWallPanels",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = ModifyCurtainWallPanelsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_curtain_walls(
         self, curtain_walls_with_details: list[CurtainWallWithDetails]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -232,15 +340,22 @@ class ElementModificationCommands:
         Modifies Curtain Wall elements in place, keeping their GUID, properties and
         classifications: the height, the bottom elevation and story, the reference line (with
         the same number of segments), and the column (primary) and row (secondary) pattern with
-        its cell assignments, in the fields of CreateCurtainWalls.
+        its cell assignments, in the fields of CreateCurtainWalls; the side of the reference
+        line (flipped), the panel offset from the reference line and the nominal width; and the
+        floor plan display settings GetDetailsOfElements reads: story visibility, display
+        option, view depth, cut, uncut and overhead projection modes, and the pens and line
+        types of the frame and panel cut lines and of the uncut and overhead lines.
 
         Args:
             curtain_walls_with_details (list[CurtainWallWithDetails]): Array of Curtain Wall
                 elements to modify, with the fields to change. Only the given fields are
                 changed; the others, and the frames and panels not affected by them, are left as
-                they are. The fields are those of CreateCurtainWalls, so a curtain wall can be
-                changed in place instead of being deleted and recreated, keeping its GUID,
-                properties and classifications.
+                they are. The fields are those of CreateCurtainWalls, plus flipped, offset and
+                nominalWidth, so a curtain wall can be changed in place instead of being deleted
+                and recreated, keeping its GUID, properties and classifications, and the floor
+                plan display fields GetDetailsOfElements returns for a curtain wall, under the
+                same names. Every given field is read back, and one Archicad did not apply fails
+                the item.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
@@ -266,7 +381,10 @@ class ElementModificationCommands:
         self, doors_with_details: list[DoorWithDetails]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Modifies Door elements based on the given parameters.
+        Modifies Door elements based on the given parameters: size, position, sill anchor
+        (verticalLink), sub-floor thickness, reveal and its anchor, surface, plane in slanted
+        walls, fix point and floor plan and section settings. The display option and these
+        settings are read back, and an item fails when Archicad did not apply one.
 
         Args:
             doors_with_details (list[DoorWithDetails])
@@ -291,21 +409,70 @@ class ElementModificationCommands:
         validated_response = ModifyDoorsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def modify_hatches(
+        self, hatches_with_details: list[HatchWithDetails], database_id: DatabaseId | None = None
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes existing Hatch (Fill) elements with the keys CreateHatches takes and
+        GetDetailsOfElements returns: the contour pen and line type, the fill pen and background
+        pen or their RGB colors, the fill or building material, the fill category, the fill
+        orientation, the area text and the percentage subtracted from the zone area, and the
+        polygon (coordinates with its arcs and holes, replaced as a whole; the hatch keeps its
+        GUID). Only the given settings are changed. With databaseId the hatches are looked for
+        in that database, e.g. a worksheet, a detail or a layout. The hatch is read back, so a
+        value Archicad did not keep is reported as a failure.
+
+        Args:
+            hatches_with_details (list[HatchWithDetails]): The Hatches (Fills) to change, each
+                with the settings to change. Only the given settings are changed; the keys are
+                those CreateHatches takes and GetDetailsOfElements returns. coordinates replaces
+                the whole polygon, with its arcs and holes.
+            database_id (DatabaseId | None): Optional database the hatches are in, e.g. a
+                worksheet, a detail or a layout (see GetDatabases, or the databaseId
+                CreateWorksheets and CreateDetails return), as CreateHatches takes it. The front
+                window stays as it is: a worksheet or detail whose window was never opened is
+                opened once on Archicad 27 and later, and the front window is brought back.
+                Without it the hatches are looked for in the current database. If Archicad
+                cannot switch to it, nothing is changed and the call fails.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "hatchesWithDetails": hatches_with_details,
+            "databaseId": database_id,
+        }
+        validated_params = ModifyHatchesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyHatches",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = ModifyHatchesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_labels(
         self, labels_with_details: list[LabelsWithDetail]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Modifies Label elements based on the given parameters.
+        Modifies Label elements based on the given parameters: the text and its style, the
+        symbol label's style, the leader line, and the leader line's coordinates, which move or
+        re-point the label.
 
         Args:
             labels_with_details (list[LabelsWithDetail]): Array of Label elements to modify,
                 with the fields to change. Only provided fields are changed; omitted fields are
                 left as-is. The label's class (Text/Symbol) cannot be changed after creation. A
                 change of the text, the runs, or a run-level style field (pen, font, faces,
-                height, effects) rebuilds the content as one paragraph, which makes the label's
-                text auto-width (word wrap off), as SetDetailsOfElements does, and on a multi-
-                run label applies that style to every run; the other style fields leave the
-                content as it is.
+                height, effects) rebuilds the content (one paragraph per line), which makes the
+                label's text auto-width (word wrap off), as SetDetailsOfElements does, and on a
+                multi-run label applies that style to every run; the other style fields leave
+                the content as it is.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
@@ -363,10 +530,12 @@ class ElementModificationCommands:
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Changes existing Level Dimension elements: the position of the marker and the settings
-        CreateLevelDimensions takes (pen, text height and pen, marker type and size, plus sign,
-        angle, origin), with the same keys. Not written: the parent element and the static level
-        (delete and recreate the dimension to change them), the text content and the hide-with-
-        base-element setting.
+        CreateLevelDimensions takes (pen, text height, pen, font and style, marker type and
+        size, plus sign, angle, origin, text content (measured or custom text with Autotext
+        keys) of both texts, and from Archicad 29 hide with associated element), with the same
+        keys, and the static level, the Static checkbox (staticLevel) and the owner element
+        (parentElementId, or ownerElementId as GetDetailsOfElements reads it, which does not
+        change the Static checkbox).
 
         Args:
             level_dimensions_with_details (list[LevelDimensionsWithDetail]): The Level
@@ -514,14 +683,128 @@ class ElementModificationCommands:
         validated_response = ModifyOpeningsResult.model_validate(response_dict)
         return validated_response.executionResults
 
+    def modify_pictures(
+        self, pictures_with_details: list[PictureWithDetails], database_id: DatabaseId | None = None
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Modifies Picture elements: moves them to a new position, resizes them to a width and
+        height in model units (one of them keeps the picture's proportions), changes the anchor
+        point, the angle, mirrored, transparent and the name. Only the given settings are
+        changed and the image stays as it is. Archicad cannot change a picture in place, so a
+        changed picture is replaced by a new one with the same image, layer, story and ID, and
+        the new elementId is returned; labels, dimensions, properties and classifications of the
+        original are not carried over. With databaseId the pictures are looked for in that
+        database, e.g. a worksheet, a detail or a layout. GetDetailsOfElements reads the
+        settings back.
+
+        Args:
+            pictures_with_details (list[PictureWithDetails]): Array of Picture elements to
+                modify, with the settings to change. Only the given settings are changed; the
+                others are left as they are. The image itself is not changed. Archicad cannot
+                change a picture in place, so a picture with a change is replaced by a new
+                picture with the same image, layer, story and ID, and the original is deleted:
+                the new picture has a new elementId (returned in elements), and labels,
+                dimensions, properties and classifications of the original are not carried over.
+            database_id (DatabaseId | None): Optional database the pictures are in, e.g. a
+                worksheet, a detail or a layout (see GetDatabases). The front window stays as it
+                is: a worksheet or detail whose window was never opened is opened once on
+                Archicad 27 and later, and the front window is brought back. Without it the
+                pictures are looked for in the current database. If Archicad cannot switch to
+                it, nothing is changed and the call fails.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: One result per item of picturesWithDetails, in
+                the same order. On success elementId is the picture's identifier after the
+                change: a new one when a setting was changed (the picture is replaced), the
+                given one when nothing was to change.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "picturesWithDetails": pictures_with_details,
+            "databaseId": database_id,
+        }
+        validated_params = ModifyPicturesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyPictures",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = ModifyPicturesResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def modify_polylines(
+        self, polylines_with_details: list[PolylineWithDetails], database_id: DatabaseId | None = None
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes existing Polyline elements with the keys CreatePolylines takes and
+        GetDetailsOfElements returns: the pen, the line type, zone boundary (roomSeparator), the
+        dash mode (drawSegmentMode), the arrowheads at both ends, and the polygon (coordinates
+        with its arcs, replaced as a whole; the polyline keeps its GUID). Only the given
+        settings are changed. With databaseId the polylines are looked for in that database,
+        e.g. a worksheet, a detail or a layout. The polyline is read back, so a value Archicad
+        did not keep is reported as a failure.
+
+        Args:
+            polylines_with_details (list[PolylineWithDetails]): The Polylines to change, each
+                with the settings to change. Only the given settings are changed; the keys are
+                those CreatePolylines takes and GetDetailsOfElements returns. coordinates
+                replaces the whole polygon, with its arcs. The pen weight override (penWeightMm
+                of CreatePolylines) is not taken: Archicad did not keep a pen weight changed on
+                an existing polyline.
+            database_id (DatabaseId | None): Optional database the polylines are in, e.g. a
+                worksheet, a detail or a layout (see GetDatabases, or the databaseId
+                CreateWorksheets and CreateDetails return), as CreatePolylines takes it. The
+                front window stays as it is: a worksheet or detail whose window was never opened
+                is opened once on Archicad 27 and later, and the front window is brought back.
+                Without it the polylines are looked for in the current database. If Archicad
+                cannot switch to it, nothing is changed and the call fails.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "polylinesWithDetails": polylines_with_details,
+            "databaseId": database_id,
+        }
+        validated_params = ModifyPolylinesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyPolylines",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = ModifyPolylinesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_railings(
         self, railings_with_details: list[RailingsWithDetail]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Modifies Railing elements in place: the height of their segments, the bottom offset and
-        the home story. The reference line, the nodes and segments, and the posts, rails and
-        panels stay as they are. Each railing is read back after the change, and a value
-        Archicad did not apply gets a failed execution result.
+        Modifies Railing elements in place: the height of all their segments, the bottom offset,
+        the home story, the story visibility (visibility, isAutoOnStoryVisibility; Archicad 29
+        does not let the automatic story visibility be turned off), the pens of the reference
+        line and the contour, and single segments (height, lateral offset) and nodes (post
+        offset, elevation, whether the pattern continues across the node) by their index in the
+        segments and nodes GetDetailsOfElements returns, and the top rail (visible), rails
+        (visible, relative, horizontal offset, height) and handrails (visible, doubleHandrail,
+        horizontal offset, height) of a segment by their index among that segment's rails and
+        handrails, the pattern of a segment (segments[].pattern: the models of its inner posts,
+        panels and baluster sets and its distribution, which the inner posts, panels and
+        baluster sets the railing has then follow) and the post model of a node (nodes[].post:
+        vertical position). Archicad generates posts, inner posts, panels and baluster sets from
+        these models; a change to a single one of them (innerPosts, panels, balusterSets, posts,
+        by index) is tried, and on Archicad 29 it is refused with a message that names the model
+        to change instead. On Archicad 29 every segment of a new railing follows the pattern of
+        segment 0. The reference line, the other segments, nodes and components and the
+        railing's GUID stay as they are. Each railing is read back once the change is done, and
+        a value Archicad did not apply gets a failed execution result.
 
         Args:
             railings_with_details (list[RailingsWithDetail])
@@ -551,9 +834,22 @@ class ElementModificationCommands:
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Modifies single-plane and multi-plane Roof elements based on the given parameters. The
-        plan outline, level, thickness and structure apply to both; angle, pivotLine and
-        edgeTrims (the cut of each polygon edge) only to single-plane roofs; levels,
-        eavesOverhang and pivotEdges only to multi-plane roofs.
+        plan outline, its holes (also on their own), level, thickness, structure, trimming body
+        (cutBodyType), the top, side and bottom surface overrides, edgeTrims (the cut of each
+        edge of the outline or contour and its holes), edgeSideMaterials (the custom surface of
+        each edge of the polygon, on a multi-plane roof of its contour; read back after
+        writing), edgeTypes (the Edge Type of each polygon edge, used by schedules; on a multi-
+        plane roof of its contour, read back after writing) and the floor plan and section
+        settings (floor plan display, show on stories, cut fill pens, contour pens and line
+        types, cover fill) apply to both; angle and pivotLine only to single-plane roofs;
+        levels, eavesOverhang, pivotEdges, contourPolygon and the segmentation of curved pivot
+        edges (segmentType, segmentsByArc, segmentsByCircle) only to multi-plane roofs. On a
+        multi-plane roof polygonOutline is the pivot polygon (GetDetailsOfElements'
+        pivotPolygonOutline), not the contour, which follows from it and the eaves overhangs;
+        contourPolygon writes the contour on its own (Manual overhang) without moving the pivot
+        polygon, and the roof is read back to check it. level is absolute (GetDetailsOfElements'
+        zCoordinate, not its story-relative level); without floorIndex it also picks the home
+        story, so send the current floorIndex with it to keep the roof on its story.
 
         Args:
             roofs_with_details (list[RoofWithDetails])
@@ -582,8 +878,19 @@ class ElementModificationCommands:
         self, shells_with_details: list[ShellWithDetails]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Modifies the structure (Basic or Composite, building material or composite) of Shell
-        elements based on the given parameters.
+        Modifies the structure (Basic or Composite, building material or composite), the
+        thickness of Basic shells, the side of the reference surface the thickness is applied to
+        (isFlipped), the trimming body (cutBodyType: Upward or Downward Extrusion), the clipping
+        contour and the holes (each with its polygon, plane and depth), the top, side (edge) and
+        bottom surface overrides, the custom surface of individual edges (edgeMaterials) and the
+        floor plan and section settings (floor plan display, show on stories, cut fill pens,
+        contour pens and line types, cover fill) of Shell elements, the extrusion vector or
+        length and the profile of extruded Shells (keeping their GUID, base plane and extrusion
+        start), the profile, axis, revolution, begin, slant and shear angles and segments of
+        revolved Shells, and the two profiles, their planes and the morphing rule of ruled
+        Shells (keeping their GUID and base plane), based on the given parameters. The reference
+        surface stays in place when the thickness changes; a thickness for a Composite shell is
+        refused, as it comes from the composite.
 
         Args:
             shells_with_details (list[ShellWithDetails])
@@ -651,10 +958,21 @@ class ElementModificationCommands:
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Modifies Slab elements based on the given parameters. CreateSlabs takes the same
-        surfaces, cut fill pens and floor fill. Not written: the surface of a single edge, and
-        the cut fill pens before Archicad 27. Of the cover fill orientation, Archicad applies
-        only the type to a Slab through the API; a given origin or distortion matrix that did
-        not stick gets a failed execution result, while the other details are applied.
+        surfaces, cut fill pens, floor fill and floor plan and section display, with the keys
+        GetDetailsOfElements reads (contourPen, contourLineTypeId, sectionContourPen,
+        sectionContourLineTypeId, hiddenContourLinePen, hiddenContourLineTypeId, visibility,
+        fillVisibility, isAutoOnStoryVisibility from Archicad 29, materialsChained,
+        linkToSettings). edgeTrim sets the Edge Angle (Vertical or CustomAngle) of every edge of
+        the slab, edgeTrims that of each edge, and edgeSideMaterials the custom surface of each
+        edge, in the order GetDetailsOfElements reports them; they cannot be combined with
+        polygonOutline or holes. A polygonOutline or holes change keeps the Edge Angle and the
+        custom surface of each edge that lies on an edge of the old polygon (also both parts of
+        a split edge), and with the same point counts that of the edge with the same index
+        (moved points); new edges are Vertical with the slab's side surface. Not written: the
+        cut fill pens before Archicad 27. Each slab is read back after the change: a given
+        display setting Archicad did not apply gets a failed execution result naming it, and so
+        does a given cover fill origin or distortion matrix, of whose orientation Archicad
+        applies only the type to a Slab through the API; the other details are applied.
 
         Args:
             slabs_with_details (list[SlabWithDetails])
@@ -684,18 +1002,38 @@ class ElementModificationCommands:
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Modifies Stair elements in place, keeping their baseline and position: the flight width,
-        total height, number of steps, riser height and going with their locks, the finish and
-        structure visibility, the extra top and bottom treads, the walking line position and
-        offset, the step numbering, the walking direction, the uniform finish, monolith and
-        draining settings, and for the flights and the landings the tread and riser settings
-        (presence, thickness, offset, nosing, riser cross section and position) and the
-        structure of each side (presence, type, underside shape and thickness). CreateStairs
-        accepts the same settings. Only the given settings are changed. Archicad solves the
-        stair again within its baseline, so it may adjust the step values; read them back with
-        GetDetailsOfElements. Not written by this command: the baseline with its landings and
-        winders, the top link, the floor plan display (symbol and marker layout), the headroom
-        and the stair rules; the subelements (treads, risers, structures) take the per-part
-        settings above and cannot be written one by one through the API.
+        total height, number of steps, riser height and going with their locks, the top link to
+        a story with its offset, the Rules and Standards (each limit and whether it is applied),
+        the headroom (generation method, height and left and right offset; read back, and one
+        Archicad did not apply is reported as an error), the finish and structure visibility,
+        the extra top and bottom treads, the walking line position and offset, the step
+        numbering, the walking direction, the uniform finish, monolith and draining settings,
+        and for the flights and the landings the tread and riser settings (presence, thickness,
+        offset, nosing, riser cross section and position) and the structure of each side
+        (presence, type, underside shape and thickness, the monolith data of a Monolith
+        structure: thinning, thickness, bottom oversize, building material and fill, surfaces,
+        pens, line types and drainings, and the stringer data of a Side structure: width, height
+        above tread and how it is measured; the monolith and stringer data are read back, and
+        one Archicad did not apply is reported as an error), and the floor plan display: whether
+        it is Custom or by the Model View Options, and for the floor plan and the reflected
+        ceiling plan separately the stories the stair is shown on and whether its walking line,
+        numbering, up/down text, description and structure are shown, the symbol on each story
+        (above, top, middle, bottom and below the relevant stories), the break line (angle, gap
+        and position) and the line type, pen and symbol fill overrides, and the line types, pens
+        and fills of the structure symbols per structure type and view (structureSymbols) and of
+        the monolithic structure per view and visible or hidden part (monolithStructureSymbols),
+        and which structures, fills and monolithic parts are shown on each range of the relevant
+        stories, per view (structureVisibilityOnStories); these are read back, and one Archicad
+        did not apply is reported as an error. CreateStairs accepts the same settings. Only the
+        given settings are changed. Archicad solves the stair again within its baseline, so it
+        may adjust the step values; read them back with GetDetailsOfElements. A given going
+        (treadDepth) is pinned in the Rules and Standards as CreateStairs pins it, before the
+        given rules are written. Not written by this command: the baseline with its landings and
+        winders; the subelements (treads, risers, structures) take the per-part settings above
+        and cannot be written one by one through the API; the boundaries and the walking lines
+        GetDetailsOfElements reads, which Archicad lays out itself from the baseline and the
+        flight width and which the API cannot write (here, in CreateStairs and in RecreateStairs
+        an item that gives one is refused with an error that says so).
 
         Args:
             stairs_with_details (list[StairWithDetails]): Array of Stair elements to modify,
@@ -732,8 +1070,8 @@ class ElementModificationCommands:
             texts_with_details (list[TextsWithDetail]): Array of Text elements to modify, with
                 the fields to change. Only provided fields are changed; omitted fields are left
                 as-is. A change of the text, the runs, or a run-level style field (pen, font,
-                faces, height, effects) rebuilds the content as one paragraph, as
-                SetDetailsOfElements does, and on a multi-run text applies that style to every
+                faces, height, effects) rebuilds the content (one paragraph per line, as
+                SetDetailsOfElements does), and on a multi-run text applies that style to every
                 run; a text that wraps keeps its wrap width through the rebuild unless the same
                 item gives a width. The other style fields and a width leave the content as it
                 is.
@@ -763,9 +1101,11 @@ class ElementModificationCommands:
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Modifies Wall elements based on the given parameters. Takes the same wall settings as
-        CreateWalls, applied by the same code, plus geometryType (Straight or Trapezoid),
-        profileType and bottomOffset. Neither command can write a Polygonal outline (it needs an
-        outline polygon, which these commands do not take), connectionPriority or
+        CreateWalls, applied by the same code, including geometryType (Straight or Trapezoid,
+        with begThickness and endThickness), profileType and the slant angles, plus
+        bottomOffset. A slantAlpha or slantBeta that the wall's profileType cannot take fails
+        the item instead of being dropped. Neither command can write a Polygonal outline (it
+        needs an outline polygon, which these commands do not take), connectionPriority or
         junctionSequence (Archicad ignores writes to them; GetDetailsOfElements reads them), and
         on Archicad 29 any story visibility other than 'Home story only' and 'All relevant
         stories'.
@@ -797,7 +1137,10 @@ class ElementModificationCommands:
         self, windows_with_details: list[WindowWithDetails]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Modifies Window elements based on the given parameters.
+        Modifies Window elements based on the given parameters: size, position, sill anchor
+        (verticalLink), sub-floor thickness, reveal and its anchor, surface, plane in slanted
+        walls, fix point and floor plan and section settings. The display option and these
+        settings are read back, and an item fails when Archicad did not apply one.
 
         Args:
             windows_with_details (list[WindowWithDetails])
@@ -826,17 +1169,21 @@ class ElementModificationCommands:
         self, zones_with_details: list[ZoneWithDetails]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Modifies Zone elements: name, number, category, zone stamp, height, base offset, top
-        link, floor thickness, contour line and cover fill - the same settings as CreateZones,
-        applied by the same helpers. Only the given fields are changed. The polygon of a manual
-        zone cannot be changed here (the change takes no polygon memo), nor the reference point
-        of an automatic one (SetDetailsOfElements moves it).
+        Modifies Zone elements: name, number, category, zone stamp, stamp pen, height, base
+        offset, top link, floor thickness, letter size (roomLSize, in millimetres), contour
+        line, cover fill, 3D surface (one surface on all sides, or the surfaces of the bounding
+        walls), polygon display (gross or net) and area reduction - the same settings as
+        CreateZones, applied by the same helpers. Only the given fields are changed. geometry
+        replaces the polygon (outline, arcs and holes) of a manual zone in place, so the zone
+        keeps its GUID, properties and other settings; a new polygon that would overlap another
+        zone on the same story is refused unless allowOverlap is true. The reference point of an
+        automatic zone cannot be changed here (SetDetailsOfElements moves it).
 
         Args:
             zones_with_details (list[ZoneWithDetails]): Array of Zone elements to modify, with
-                the fields to change. Only the given fields are changed; the polygon and the
-                omitted fields are kept. The same fields as the ZoneSettings of
-                SetDetailsOfElements.
+                the fields to change. Only the given fields are changed and the omitted fields
+                are kept; the polygon is kept unless geometry is given. The same fields as the
+                ZoneSettings of SetDetailsOfElements, plus geometry and allowOverlap.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution

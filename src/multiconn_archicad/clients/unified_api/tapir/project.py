@@ -30,6 +30,8 @@ from multiconn_archicad.models.tapir.commands import (
     DeleteProjectInfoFieldsResult,
     DeleteProjectInfoGroupsParameters,
     DeleteProjectInfoGroupsResult,
+    DeleteStoryParameters,
+    DeleteStoryResult,
     FindDimensionStandardParameters,
     FindDimensionStandardResult,
     GetAllAutoTextKeysResult,
@@ -70,8 +72,14 @@ from multiconn_archicad.models.tapir.commands import (
     GetStoriesResult,
     GetSunSettingsResult,
     GetSurveyPointTransformationResult,
+    InsertStoryParameters,
+    InsertStoryResult,
     InterpretAutoTextsParameters,
     InterpretAutoTextsResult,
+    MergeFileParameters,
+    MergeFileResult,
+    ModifyStoryParameters,
+    ModifyStoryResult,
     MoveProjectInfoFieldsParameters,
     MoveProjectInfoFieldsResult,
     MoveProjectInfoGroupsParameters,
@@ -103,6 +111,7 @@ from multiconn_archicad.models.tapir.commands import (
     SetProjectPreferencesParameters,
     SetProjectPreferencesResult,
     SetStoriesParameters,
+    SetStoriesResult,
     UpdateHotlinksParameters,
     UpdateHotlinksResult,
 )
@@ -129,6 +138,7 @@ from multiconn_archicad.models.tapir.types import (
     HotlinkNodeChange,
     HotlinkNodeCreated,
     HotlinkNodeReference,
+    HotlinkOrigin,
     HotlinkOwnersOfElement,
     HotlinkProxyElementTable,
     HotlinkSourceReference,
@@ -158,6 +168,8 @@ from multiconn_archicad.models.tapir.types import (
     ProjectReferenceLevelsUpdate,
     RenovationStatusName,
     ResolvedName,
+    StoryInsertionPosition,
+    StoryParameters,
     StorySettings,
     SuccessfulExecutionResult,
     SunDateTimeUpdate,
@@ -313,7 +325,8 @@ class ProjectCommands:
 
     def close_project(self) -> SuccessfulExecutionResult:
         """
-        Closes the currently opened project.
+        Closes the currently opened project. Fails, instead of answering success, when Archicad
+        leaves the project open, as it does with its last open project.
 
         Returns:
             SuccessfulExecutionResult
@@ -586,6 +599,49 @@ class ProjectCommands:
         )
         validated_response = DeleteProjectInfoGroupsResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def delete_story(
+        self, story_index: int, delete_elements: None | bool = None, dry_run: None | bool = None
+    ) -> DeleteStoryResult:
+        """
+        Deletes one story. Archicad deletes every element whose home story it is together with
+        it, so a story that is the home story of any element is only deleted with
+        deleteElements: true; otherwise it fails and gives the number of those elements. dryRun
+        reports, without changing anything, whether the story would be deleted and how many
+        elements with it.
+
+        Args:
+            story_index (int): The index of the story to delete (see GetStories).
+            delete_elements (None | bool): Archicad deletes every element whose home story is
+                the deleted story. Without true here, a story that is the home story of any
+                element is not deleted, and the response says how many elements it has. Default
+                is false.
+            dry_run (None | bool): If true, the command makes all the checks of a real run and
+                resolves the same targets, with the same errors, but changes nothing in the
+                project and creates no undo step. The response is that of a real run with
+                "dryRun": true added, and says for each target what the real run would do.
+                Default is false.
+
+        Returns:
+            DeleteStoryResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "storyIndex": story_index,
+            "deleteElements": delete_elements,
+            "dryRun": dry_run,
+        }
+        validated_params = DeleteStoryParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "DeleteStory",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = DeleteStoryResult.model_validate(response_dict)
+        return validated_response
 
     def find_dimension_standard(self, name: str) -> FindDimensionStandardResult:
         """
@@ -1242,6 +1298,53 @@ class ProjectCommands:
         validated_response = GetSurveyPointTransformationResult.model_validate(response_dict)
         return validated_response
 
+    def insert_story(
+        self,
+        story_index: int,
+        position: StoryInsertionPosition,
+        name: None | str = None,
+        height: None | float = None,
+        disp_on_sections: None | bool = None,
+    ) -> StoryParameters:
+        """
+        Inserts one new story directly above or below an existing story, with its name, height
+        and level line display, and returns the new story as GetStories reports it. Other
+        stories are never deleted; their indices and levels can change with the insertion as in
+        Archicad's Story Settings dialog, so read them again with GetStories.
+
+        Args:
+            story_index (int): The index of an existing story (see GetStories) next to which the
+                new story is inserted.
+            position (StoryInsertionPosition)
+            name (None | str): The name of the new story. Default is an empty name.
+            height (None | float): The height of the new story, greater than zero. Default is
+                the height of the story of storyIndex.
+            disp_on_sections (None | bool): Whether the level line of the new story appears on
+                sections and elevations. Default is what Archicad gives a new story.
+
+        Returns:
+            StoryParameters: The new story, as GetStories reports it after the insertion.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "storyIndex": story_index,
+            "position": position,
+            "name": name,
+            "height": height,
+            "dispOnSections": disp_on_sections,
+        }
+        validated_params = InsertStoryParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "InsertStory",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = InsertStoryResult.model_validate(response_dict)
+        return validated_response.story
+
     def interpret_auto_texts(
         self, auto_texts: list[str], element_id: ElementId | None = None
     ) -> list[ErrorItem | InterpretedAutoText]:
@@ -1278,6 +1381,114 @@ class ProjectCommands:
         )
         validated_response = InterpretAutoTextsResult.model_validate(response_dict)
         return validated_response.values
+
+    def merge_file(
+        self,
+        source_location: str,
+        origin: HotlinkOrigin | None = None,
+        rotation_angle: None | float = None,
+        mirrored: None | bool = None,
+        floor_index: None | int = None,
+    ) -> list[ElementIdArrayItem]:
+        """
+        Merges an Archicad project or module file into the model, as File > Interoperability >
+        Merge does, at an origin, rotation and mirroring, each story of the file on the story
+        with the same index (or from floorIndex on). The Archicad API has no merge, so the file
+        is placed as a hotlink and the hotlink is broken, in one undo step, and the elements
+        that are new afterwards are returned; Archicad leaves them grouped together. A file the
+        project already hotlinks is refused, because breaking would break that hotlink too.
+
+        Args:
+            source_location (str): Absolute path of the file to merge: an Archicad project
+                (.pln, .pla) or module (.mod). It cannot be a file the project already hotlinks:
+                breaking that hotlink would turn its placed instances into ordinary elements
+                too.
+            origin (HotlinkOrigin | None): Optional. Where the origin of the file lands in the
+                project. Defaults to the project origin; if z is omitted, it is 0.
+            rotation_angle (None | float): Optional rotation about the origin, counter-
+                clockwise, in radians. Defaults to 0.
+            mirrored (None | bool): Optional. Reflects the file's local X axis before the
+                rotation. Defaults to false.
+            floor_index (None | int): Optional story of the project that the story with index 0
+                of the file goes to; the other stories of the file follow it. Defaults to 0, so
+                each story of the file goes to the story with the same index.
+
+        Returns:
+            list[ElementIdArrayItem]: The elements the merge added to the model, every element
+                of the file's model. Archicad leaves them grouped together, as it leaves the
+                elements of a broken hotlink; UngroupElements dissolves the group.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "sourceLocation": source_location,
+            "origin": origin,
+            "rotationAngle": rotation_angle,
+            "mirrored": mirrored,
+            "floorIndex": floor_index,
+        }
+        validated_params = MergeFileParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "MergeFile",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = MergeFileResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def modify_story(
+        self,
+        story_index: int,
+        name: None | str = None,
+        level: None | float = None,
+        height: None | float = None,
+        disp_on_sections: None | bool = None,
+    ) -> StoryParameters:
+        """
+        Changes the name, level, height or level line display of one story, and returns the
+        story as GetStories reports it. It never adds or deletes a story. level moves only this
+        story; height moves every story above with the top of this one, as in Archicad's Story
+        Settings dialog. The elements of a moved story move with it.
+
+        Args:
+            story_index (int): The index of the story to modify (see GetStories).
+            name (None | str): The new name of the story.
+            level (None | float): The new level of the story. Only this story moves: the story
+                below gets taller or shorter, and the stories above stay where they are unless
+                height is given too. It must stay above the level of the story below, and,
+                without height, below the level of the story above. On the top story without
+                height its top stays where it is: moving it up makes it shorter by as much, and
+                moving it down taller.
+            height (None | float): The new height of the story, greater than zero. As in
+                Archicad's Story Settings dialog, every story above moves up or down with the
+                top of this story and keeps its height.
+            disp_on_sections (None | bool): Whether the level line of the story appears on
+                sections and elevations.
+
+        Returns:
+            StoryParameters: The modified story, as GetStories reports it after the change.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "storyIndex": story_index,
+            "name": name,
+            "level": level,
+            "height": height,
+            "dispOnSections": disp_on_sections,
+        }
+        validated_params = ModifyStoryParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyStory",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = ModifyStoryResult.model_validate(response_dict)
+        return validated_response.story
 
     def move_project_info_fields(
         self, project_info_fields: list[ProjectInfoFieldMove]
@@ -1418,11 +1629,13 @@ class ProjectCommands:
         Document > Creative Imaging > PhotoRender Projection does, and saves the image to a file
         (png, jpg, bmp, tiff or gif). The image size, resolution and quality come from the
         scene; a width, height or resolution given here is used for this render only, the scene
-        is not changed. With overwrite false it refuses to replace an existing file.
+        is not changed. With overwrite false it refuses to replace an existing file; a folder
+        that does not exist is refused before rendering.
 
         Args:
-            image_file_path (str): Absolute path of the image file to write. An existing file is
-                overwritten, unless overwrite is false.
+            image_file_path (str): Absolute path of the image file to write. Its folder must
+                exist: a missing folder is refused before anything is rendered. An existing file
+                is overwritten, unless overwrite is false.
             format (None | PhotoRenderFormat)
             scene_name (None | str): Optional. The rendering scene to render with, one of the
                 names GetRenderingScenes returns. It is made the current scene first, as
@@ -2122,7 +2335,11 @@ class ProjectCommands:
 
     def set_stories(self, stories: list[StorySettings]) -> SuccessfulExecutionResult:
         """
-        Sets the story sructure of the currently loaded project.
+        Sets the story structure of the currently loaded project to the given list of stories.
+        Existing stories outside the list are deleted, and Archicad deletes every element whose
+        home story they are with them; dryRun lists those stories with the number of elements on
+        each, without changing anything. To add, change or delete a single story, use
+        InsertStory or DeleteStory instead.
 
         Args:
             stories (list[StorySettings]): A list of story settings, used as input for creating
@@ -2144,7 +2361,39 @@ class ProjectCommands:
             "SetStories",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
+        return TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
+
+    def set_stories_dry_run(self, stories: list[StorySettings]) -> SetStoriesResult:
+        """
+        Preview this command without applying its changes. Sets the story structure of the
+        currently loaded project to the given list of stories. Existing stories outside the list
+        are deleted, and Archicad deletes every element whose home story they are with them;
+        dryRun lists those stories with the number of elements on each, without changing
+        anything. To add, change or delete a single story, use InsertStory or DeleteStory
+        instead.
+
+        Args:
+            stories (list[StorySettings]): A list of story settings, used as input for creating
+                or modifying multiple stories.
+
+        Returns:
+            SetStoriesResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "stories": stories,
+            "dryRun": True,
+        }
+        validated_params = SetStoriesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetStories",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = SetStoriesResult.model_validate(response_dict)
         return validated_response
 
     def update_hotlinks(

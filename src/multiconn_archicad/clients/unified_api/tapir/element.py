@@ -74,6 +74,10 @@ from multiconn_archicad.models.tapir.commands import (
     GetElementChangesSinceResult,
     GetElementConnectionsParameters,
     GetElementConnectionsResult,
+    GetElementFieldDefinitionsParameters,
+    GetElementFieldDefinitionsResult,
+    GetElementFieldsParameters,
+    GetElementFieldsResult,
     GetElementPreviewImageParameters,
     GetElementPreviewImageResult,
     GetElementTypeNamesParameters,
@@ -83,6 +87,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetElementsByTypeParameters,
     GetElementsInCreationOrderParameters,
     GetElementsInDrawOrderParameters,
+    GetFieldsOfElementDefaultsParameters,
+    GetFieldsOfElementDefaultsResult,
     GetGDLParametersOfElementsParameters,
     GetGDLParametersOfElementsResult,
     GetGridElementDefaultsParameters,
@@ -113,10 +119,14 @@ from multiconn_archicad.models.tapir.commands import (
     GetOpeningSymbolParametersResult,
     GetOpeningTransformationsParameters,
     GetOpeningTransformationsResult,
+    GetProfileValuesOfElementsParameters,
+    GetProfileValuesOfElementsResult,
     GetPropertyObjectsOfElementsParameters,
     GetPropertyObjectsOfElementsResult,
     GetQuantitiesOfElementsParameters,
     GetQuantitiesOfElementsResult,
+    GetRailingSegmentPatternsParameters,
+    GetRailingSegmentPatternsResult,
     GetRelationsOfElementsParameters,
     GetRelationsOfElementsResult,
     GetRoofPlanesParameters,
@@ -164,6 +174,22 @@ from multiconn_archicad.models.tapir.commands import (
     MoveElementsResult,
     PlaceOpeningsParameters,
     PlaceOpeningsResult,
+    RecreateAngleDimensionsParameters,
+    RecreateAngleDimensionsResult,
+    RecreateCurtainWallsParameters,
+    RecreateCurtainWallsResult,
+    RecreateDoorsParameters,
+    RecreateDoorsResult,
+    RecreateRailingsParameters,
+    RecreateRailingsResult,
+    RecreateSkylightsParameters,
+    RecreateSkylightsResult,
+    RecreateStairsParameters,
+    RecreateStairsResult,
+    RecreateWindowsParameters,
+    RecreateWindowsResult,
+    RecreateZonesParameters,
+    RecreateZonesResult,
     RefreshElementsParameters,
     RefreshElementsResult,
     RegularizePolygonsParameters,
@@ -180,13 +206,19 @@ from multiconn_archicad.models.tapir.commands import (
     RunParameterScriptOfElementsResult,
     ScaleElementsParameters,
     ScaleElementsResult,
+    SetCategoryValuesOfDefaultsParameters,
+    SetCategoryValuesOfDefaultsResult,
     SetCategoryValuesOfElementsParameters,
     SetCategoryValuesOfElementsResult,
     SetDetailsOfElementsParameters,
     SetDetailsOfElementsResult,
+    SetElementFieldsParameters,
+    SetElementFieldsResult,
     SetElementInfoStringsParameters,
     SetElementInfoStringsResult,
     SetElementNotificationClientParameters,
+    SetFieldsOfElementDefaultsParameters,
+    SetFieldsOfElementDefaultsResult,
     SetGDLParametersOfElementsParameters,
     SetGDLParametersOfElementsResult,
     SetLinkedPropertyObjectsOfElementsParameters,
@@ -220,6 +252,7 @@ from multiconn_archicad.models.tapir.commands import (
 )
 from multiconn_archicad.models.tapir.types import (
     AlignTo,
+    AngleDimensionRecreationData,
     BeamRelations,
     BeamSegmentRelations,
     BoundingBox2D,
@@ -235,12 +268,15 @@ from multiconn_archicad.models.tapir.types import (
     Coordinate3D,
     Copy,
     CurtainWallAbsoluteBottom,
+    CurtainWallRecreationData,
     DatabaseId,
     DatabaseIdArrayItem,
+    DefaultCategoryValueData,
     DefaultCategoryValues,
     DetailsOfElement,
     DimensionData,
     Direction,
+    DoorRecreationData,
     DrawingPrimitive,
     Element,
     ElementBodyMaterials,
@@ -255,6 +291,8 @@ from multiconn_archicad.models.tapir.types import (
     ElementDetailsAdditionalField,
     ElementDetailsField,
     ElementDrawingPrimitives,
+    ElementFieldValues,
+    ElementFieldsUpdate,
     ElementFilter,
     ElementGeometry3D,
     ElementHeaderFromOtherDatabase,
@@ -270,6 +308,7 @@ from multiconn_archicad.models.tapir.types import (
     ElementLinks,
     ElementMirrorData,
     ElementNotSplit,
+    ElementProfileValues,
     ElementPropertyObjects,
     ElementQuantityDetails,
     ElementStateId,
@@ -324,27 +363,35 @@ from multiconn_archicad.models.tapir.types import (
     PolylineRegularizationData,
     PropertyCriterion,
     PropertyObjectToolDefault,
+    RailingRecreationData,
+    RailingSegmentPatternsResult,
+    RecreatedElement,
     RegularizedPolygons,
     RegularizedPolyline,
     RoofOrShellRelationsOfElement,
     RoofPlanesOfElements,
     SkylightHolePolygon,
+    SkylightRecreationData,
     SnapPointsOfElements,
     SplineDistanceInput,
     SplineMaxDistance,
     SplitElementParts,
     StairBaselineData,
     StairBaselineSolution,
+    StairRecreationData,
     Subelement,
     SuccessfulExecutionResult,
     TextContentChange,
     TextMeasurement,
     TextMeasurementByFontIndex,
     TextMeasurementByFontName,
+    ToolDefaultFieldsUpdate,
     VisibleSkinStatus,
     WallRelations,
+    WindowRecreationData,
     ZoneBoundariesOfZonesWrapper,
     ZoneBoundariesWrapper,
+    ZoneRecreationData,
     ZoneReductions,
     ZoneRelationsOfElement,
 )
@@ -443,11 +490,12 @@ class ElementCommands:
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Changes the library part of the given Object, Lamp, Window, Door, Skylight, Zone and
-        symbol Label elements to another library part of the same type, given by name, index or
-        guid, e.g. to replace missing library parts with ones from the loaded libraries. The
-        elements themselves (guid, properties, classifications) are kept. Components of stairs
-        and railings are not supported, even when they are reported as Objects. Optionally keeps
-        the values of the GDL parameters with the same name and type, and the size (A and B).
+        symbol Label elements to another library part of the same type (Wall End parts for wall
+        ends), given by name, index or guid, e.g. to replace missing library parts with ones
+        from the loaded libraries. The elements themselves (guid, properties, classifications)
+        are kept. Components of stairs and railings are not supported, even when they are
+        reported as Objects. Optionally keeps the values of the GDL parameters with the same
+        name and type, and the size (A and B).
 
         Args:
             elements_with_library_part (list[ElementLibraryPartChange]): The elements with the
@@ -664,12 +712,14 @@ class ElementCommands:
         self, elements: list[ElementIdArrayItem]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Deletes elements. The zones of the call are deleted before all the other elements, so an
-        automatic zone deleted together with its bounding walls is gone before its boundary is;
-        deleting the boundary of an automatic zone without the zone itself can open Archicad's
-        modal 'No closed polygon found' dialog, which blocks the command until someone clicks it
-        in Archicad. Returns an execution result for each input element: an element that could
-        not be deleted (for example because its layer is locked) or a guid that is not in the
+        Deletes elements, each in the database that contains it (the floor plan, a section, a
+        worksheet, a layout, ...), whichever window is the current one; the current window
+        stays. The zones of the call are deleted before all the other elements, so an automatic
+        zone deleted together with its bounding walls is gone before its boundary is; deleting
+        the boundary of an automatic zone without the zone itself can open Archicad's modal 'No
+        closed polygon found' dialog, which blocks the command until someone clicks it in
+        Archicad. Returns an execution result for each input element: an element that could not
+        be deleted (for example because its layer is locked) or a guid that is not in the
         project gets a failed execution result instead of being skipped silently, and does not
         stop the other elements from being deleted. With dryRun true nothing is deleted and no
         undo step is created: the response has dryRun set to true, and each element that passes
@@ -677,12 +727,14 @@ class ElementCommands:
         before making it.
 
         Args:
-            elements (list[ElementIdArrayItem]): The elements to delete. The zones among them
-                are deleted before all the others, so an automatic zone deleted together with
-                its bounding elements is gone before its boundary is. Deleting the boundary of
-                an automatic zone without the zone itself can open Archicad's modal 'No closed
-                polygon found around the clicked point' dialog, which blocks the command until
-                someone clicks it in Archicad.
+            elements (list[ElementIdArrayItem]): The elements to delete, of any database (the
+                floor plan, a section, a worksheet, a layout, ...): each is deleted in the
+                database that contains it, whichever window is the current one, and the current
+                window stays. The zones among them are deleted before all the others, so an
+                automatic zone deleted together with its bounding elements is gone before its
+                boundary is. Deleting the boundary of an automatic zone without the zone itself
+                can open Archicad's modal 'No closed polygon found around the clicked point'
+                dialog, which blocks the command until someone clicks it in Archicad.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each input
@@ -707,25 +759,29 @@ class ElementCommands:
 
     def delete_elements_dry_run(self, elements: list[ElementIdArrayItem]) -> DeleteElementsResult:
         """
-        Preview this command without applying its changes. Deletes elements. The zones of the
-        call are deleted before all the other elements, so an automatic zone deleted together
-        with its bounding walls is gone before its boundary is; deleting the boundary of an
-        automatic zone without the zone itself can open Archicad's modal 'No closed polygon
-        found' dialog, which blocks the command until someone clicks it in Archicad. Returns an
-        execution result for each input element: an element that could not be deleted (for
-        example because its layer is locked) or a guid that is not in the project gets a failed
-        execution result instead of being skipped silently, and does not stop the other elements
-        from being deleted. With dryRun true nothing is deleted and no undo step is created: the
-        response has dryRun set to true, and each element that passes the checks made before
-        deleting gets wouldDelete, so a script can preview a deletion before making it.
+        Preview this command without applying its changes. Deletes elements, each in the
+        database that contains it (the floor plan, a section, a worksheet, a layout, ...),
+        whichever window is the current one; the current window stays. The zones of the call are
+        deleted before all the other elements, so an automatic zone deleted together with its
+        bounding walls is gone before its boundary is; deleting the boundary of an automatic
+        zone without the zone itself can open Archicad's modal 'No closed polygon found' dialog,
+        which blocks the command until someone clicks it in Archicad. Returns an execution
+        result for each input element: an element that could not be deleted (for example because
+        its layer is locked) or a guid that is not in the project gets a failed execution result
+        instead of being skipped silently, and does not stop the other elements from being
+        deleted. With dryRun true nothing is deleted and no undo step is created: the response
+        has dryRun set to true, and each element that passes the checks made before deleting
+        gets wouldDelete, so a script can preview a deletion before making it.
 
         Args:
-            elements (list[ElementIdArrayItem]): The elements to delete. The zones among them
-                are deleted before all the others, so an automatic zone deleted together with
-                its bounding elements is gone before its boundary is. Deleting the boundary of
-                an automatic zone without the zone itself can open Archicad's modal 'No closed
-                polygon found around the clicked point' dialog, which blocks the command until
-                someone clicks it in Archicad.
+            elements (list[ElementIdArrayItem]): The elements to delete, of any database (the
+                floor plan, a section, a worksheet, a layout, ...): each is deleted in the
+                database that contains it, whichever window is the current one, and the current
+                window stays. The zones among them are deleted before all the others, so an
+                automatic zone deleted together with its bounding elements is gone before its
+                boundary is. Deleting the boundary of an automatic zone without the zone itself
+                can open Archicad's modal 'No closed polygon found around the clicked point'
+                dialog, which blocks the command until someone clicks it in Archicad.
 
         Returns:
             DeleteElementsResult
@@ -1188,7 +1244,10 @@ class ElementCommands:
         """
         Returns the identifier of all elements on the plan. Use the optional filter parameter
         for filtering. Objects that belong to another element (zone stamps, the parts of stairs
-        and railings) are left out unless the IncludeSubElemObjects filter is given.
+        and railings) are left out unless the IncludeSubElemObjects filter is given. Without
+        databases it lists the current database: in a section or elevation window the model
+        elements that the window shows (and its own 2D elements); pass the floor plan's database
+        (GetDatabases) to list every model element.
 
         Args:
             filters (None | list[ElementFilter])
@@ -1539,9 +1598,16 @@ class ElementCommands:
         parameter to return only the fields you need (e.g. elementId, type, id, floorIndex) and
         skip the computation of the others (for example floorPlanPolygons). Use the optional
         additionalFields parameter to also get the info string, the compound info string, the
-        library part unique ID and the creator tool unique ID. An element of another database (a
-        layout, a section, a worksheet ...) returns only its header fields (type, floor index,
-        layer, draw index) with fromOtherDatabase set to true.
+        library part unique ID and the creator tool unique ID. The components of a Railing
+        (posts, inner posts, rails, top rails, handrails, balusters, baluster sets, panels,
+        patterns, rail ends, rail connections and end finishes, as
+        GetSubelementsOfHierarchicalElements lists them) return their owner, library part and
+        settings. A Stair returns the structure settings of each part and side (structures, with
+        the monolith or side stringer data of its type), and a StairStructure subelement returns
+        the same keys. A Stair also returns its plan outline (its left and right boundary lines)
+        and its walking lines. An element of another database (a layout, a section, a worksheet
+        ...) returns only its header fields (type, floor index, layer, draw index) with
+        fromOtherDatabase set to true.
 
         Args:
             elements (None | list[ElementIdArrayItem]): Optional list of elements to get details
@@ -1588,9 +1654,11 @@ class ElementCommands:
 
     def get_dimension_data(self, elements: list[Element]) -> list[DimensionData | ErrorItem]:
         """
-        Gets the data of existing dimension chains: the line pen, the marker type and pen and
-        the default witness line, and per witness point the coordinates, measured value, witness
-        line and the text height, pen and frame.
+        Gets the data of existing dimension chains: the line pen, the marker type, pen and size,
+        the text placement method and the default witness line, and per witness point the
+        coordinates, measured value, witness line, the text height, pen, frame, font and style,
+        and the text content (measured value or custom text), superscript and whether the text
+        was moved by hand.
 
         Args:
             elements (list[Element]): The identifier of the dimension elements.
@@ -1622,7 +1690,9 @@ class ElementCommands:
         polygons, pictures) Archicad draws each given floor plan element from, in drawing order,
         as ACAPI_DrawingPrimitive_ShapePrimsExt decomposes it on every story and unclipped.
         Control items (type Ctrl_*) mark the beginning and the end of sub-parts such as hatches
-        and texts. Texts are returned without their content and polylines without their
+        and texts. Texts are returned with their content, the text as Archicad displays it (for
+        example the lines of a zone stamp with their values filled in), which each element's
+        texts list also collects in drawing order; polylines are returned without their
         vertices. A Ctrl_ElementRef item names the element it refers to: the drawing of a Wall
         ends with one for each Window and Door in it, while Windows and Doors give no primitives
         of their own. The floor plan must be the current database. The output is aligned with
@@ -1672,9 +1742,11 @@ class ElementCommands:
             coordinate (Coordinate2D): The point to search at, in the project's coordinates, on
                 the floor plan of the current database.
             z (None | float): Optional. The elevation of the search point, handed to Archicad
-                together with the coordinate. Default is 0; without z a point 1 mm higher is
-                also tried, so an element whose top is at 0 (for example a slab at the story
-                level) is found.
+                together with the coordinate. Archicad finds the highest element whose top is
+                below z. Default is 0; without z a point 1 mm higher is also tried, so an
+                element whose top is at 0 (for example a slab at the story level) is found, and
+                then the topmost element on the active story, so an element whose top is above
+                the story level is found too, like a click on the floor plan.
             filters (None | list[ElementFilter]): Optional. Only an element passing every given
                 filter is found (the same values as FilterElements accepts).
 
@@ -1792,6 +1864,73 @@ class ElementCommands:
         validated_response = GetElementConnectionsResult.model_validate(response_dict)
         return validated_response
 
+    def get_element_field_definitions(self, element_type: ElementType) -> GetElementFieldDefinitionsResult:
+        """
+        Lists every field of an element type's struct in the Archicad API (e.g.
+        API_AngleDimensionType) that GetElementFields reads and SetElementFields writes (and
+        GetFieldsOfElementDefaults and SetFieldsOfElementDefaults in the tool defaults): its
+        path, JSON type, C++ kind, size and whether it is read-only. The list is generated from
+        the Archicad 29 and 30 DevKit headers; other Archicad versions answer that it is not
+        available.
+
+        Args:
+            element_type (ElementType): The element type whose fields are listed.
+
+        Returns:
+            GetElementFieldDefinitionsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementType": element_type,
+        }
+        validated_params = GetElementFieldDefinitionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElementFieldDefinitions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = GetElementFieldDefinitionsResult.model_validate(response_dict)
+        return validated_response
+
+    def get_element_fields(
+        self, elements: list[ElementIdArrayItem], fields: None | list[str] = None
+    ) -> list[ElementFieldValues | ErrorItem]:
+        """
+        Reads fields of elements by their path in the element's struct in the Archicad API (e.g.
+        note.noteFont of an angle dimension, u.planeRoof.angle of a roof): every field, or only
+        the given ones. Reaches the settings the other commands do not return.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+            fields (None | list[str]): The paths of the fields to read (see
+                GetElementFieldDefinitions), e.g. ["note.noteFont", "note.frame"]. Every field
+                of the element is read when it is left out. A path the element type does not
+                have is listed in the element's missingFields.
+
+        Returns:
+            list[ElementFieldValues | ErrorItem]: The fields of each element, aligned with the
+                input.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+            "fields": fields,
+        }
+        validated_params = GetElementFieldsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetElementFields",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = GetElementFieldsResult.model_validate(response_dict)
+        return validated_response.elementFields
+
     def get_element_preview_image(
         self,
         element_id: ElementId,
@@ -1871,6 +2010,7 @@ class ElementCommands:
         property_criteria: None | list[PropertyCriterion] = None,
         count_only: None | bool = None,
         limit: None | int = None,
+        databases: None | list[DatabaseIdArrayItem] = None,
     ) -> GetElementsByCriteriaResult:
         """
         Returns the elements, or with countOnly only their number, that match all the given
@@ -1879,7 +2019,9 @@ class ElementCommands:
         hasValue, isUserUndefined, isNotAvailable, isDefault or hasCustomValue). An unknown
         type, property or operator is an error, not ignored. Objects that belong to another
         element (zone stamps, the parts of stairs and railings) are left out unless the
-        IncludeSubElemObjects filter is given.
+        IncludeSubElemObjects filter is given. It searches the current database, as
+        GetElementsByType does (in a section or elevation window the model elements the window
+        shows), or the given databases.
 
         Args:
             types (None | list[ElementType]): Optional filter for element types (e.g. ['Wall',
@@ -1897,6 +2039,10 @@ class ElementCommands:
                 without listing their GUIDs. Minimizes token usage.
             limit (None | int): Maximum number of matching elements to list. The count is still
                 the total number of matches.
+            databases (None | list[DatabaseIdArrayItem]): Optional. The databases to search, as
+                GetDatabases lists them; an element found in more than one is counted once. If
+                omitted, the current database is searched: the floor plan, or in a section or
+                elevation window the model elements it shows.
 
         Returns:
             GetElementsByCriteriaResult
@@ -1914,6 +2060,7 @@ class ElementCommands:
             "propertyCriteria": property_criteria,
             "countOnly": count_only,
             "limit": limit,
+            "databases": databases,
         }
         validated_params = GetElementsByCriteriaParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -1933,7 +2080,10 @@ class ElementCommands:
         Returns the identifier of every element of the given type on the plan. It works for any
         type. Use the optional filter parameter for filtering. Objects that belong to another
         element (zone stamps, the parts of stairs and railings) are left out unless the
-        IncludeSubElemObjects filter is given.
+        IncludeSubElemObjects filter is given. Without databases it lists the current database:
+        in a section or elevation window the model elements of the type that the window shows,
+        the same elements GetAllElements reports there; pass the floor plan's database
+        (GetDatabases) to list every one.
 
         Args:
             element_type (ElementType)
@@ -2002,7 +2152,8 @@ class ElementCommands:
         Back), as ACAPI_DrawOrder_DrawOrderGetNext walks it. Use the optional elementType and
         filters parameters for filtering. Objects that belong to another element (zone stamps,
         the parts of stairs and railings) are left out unless the IncludeSubElemObjects filter
-        is given.
+        is given. Items of the drawing order whose element Archicad cannot read are left out
+        too, so every returned identifier can be used with the other commands.
 
         Args:
             element_type (ElementType | None): Optional. Only elements of this type are
@@ -2033,12 +2184,72 @@ class ElementCommands:
         validated_response = TypeAdapter(ElementsWithExecutionResults).validate_python(response_dict)
         return validated_response
 
-    def get_gdl_parameters_of_elements(self, elements: list[ElementIdArrayItem]) -> list[GDLParameterList]:
+    def get_fields_of_element_defaults(
+        self, element_types: list[ElementType], fields: None | list[str] = None
+    ) -> list[ElementFieldValues | ErrorItem]:
         """
-        Gets all the GDL parameters (name, type, value) of the given elements.
+        Reads fields of the tool defaults of element types, the settings new elements of the
+        type get, by their path in the element's struct in the Archicad API (see
+        GetElementFieldDefinitions), e.g. thickness of the wall defaults: every field, or only
+        the given ones. Reaches the default settings the other commands do not return. The list
+        is generated from the Archicad 29 and 30 DevKit headers; other Archicad versions answer
+        that it is not available.
+
+        Args:
+            element_types (list[ElementType]): The element types whose tool defaults are read.
+            fields (None | list[str]): The paths of the fields to read (see
+                GetElementFieldDefinitions), e.g. ["thickness", "height"]. Every field of the
+                defaults is read when it is left out. A path the element type does not have is
+                listed in missingFields.
+
+        Returns:
+            list[ElementFieldValues | ErrorItem]: The fields of the tool defaults of each
+                element type, in the input order, or an error when the type has no fields in the
+                table or no tool defaults.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementTypes": element_types,
+            "fields": fields,
+        }
+        validated_params = GetFieldsOfElementDefaultsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetFieldsOfElementDefaults",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = GetFieldsOfElementDefaultsResult.model_validate(response_dict)
+        return validated_response.fieldsOfElementDefaults
+
+    def get_gdl_parameters_of_elements(
+        self,
+        elements: list[ElementIdArrayItem],
+        *,
+        parameter_names: None | list[str] = None,
+        include_possible_values: None | bool = None,
+    ) -> list[GDLParameterList]:
+        """
+        Gets all the GDL parameters (name, type, value) of the given elements. parameterNames
+        returns only the named parameters, and includePossibleValues false leaves out the value
+        lists (which for font parameters list every installed font), for a much smaller answer.
+        For the railing components GetSubelementsOfHierarchicalElements lists (posts, rails,
+        balusters, panels ...), which have no parameter session in the Archicad API, the
+        parameters are read from the component itself: isLocked is then always false and
+        possibleValues is not given.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
+            parameter_names (None | list[str]): Optional. Only the parameters with these GDL
+                variable names are returned (case-insensitive), in the order of the library
+                part. A name the element's library part does not have is left out. All
+                parameters are returned when it is not given.
+            include_possible_values (None | bool): Optional, true by default. When false,
+                possibleValues (the value lists of the Parameter Script, e.g. every installed
+                font for a font parameter) is left out of the answer, which makes it much
+                smaller.
 
         Returns:
             list[GDLParameterList]: The GDL parameters of elements.
@@ -2050,6 +2261,8 @@ class ElementCommands:
         """
         params_dict = {
             "elements": elements,
+            "parameterNames": parameter_names,
+            "includePossibleValues": include_possible_values,
         }
         validated_params = GetGDLParametersOfElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -2148,7 +2361,8 @@ class ElementCommands:
     def get_hotspots_of_elements(self, elements: list[ElementIdArrayItem]) -> list[ElementHotspots | ErrorItem]:
         """
         Gets the 2D hotspots of the given library part instances (Objects, Lamps, Windows,
-        Doors, Skylights, Zones, Curtain Wall parts, etc.), e.g. to dimension to them.
+        Doors, Skylights, Zones, Curtain Wall parts, etc.), in the library part's own coordinate
+        system. For their positions in the project use GetSnapPointsOfElements.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
@@ -2274,17 +2488,20 @@ class ElementCommands:
     ) -> list[ErrorItem | MarkerParametersOfElement]:
         """
         Gets the marker library part and the marker's GDL parameters (name, type, value) of the
-        given Window and Door elements. The marker is the stamp drawn next to the opening on the
-        floor plan; its parameters are separate from the opening's own GDL parameters, which
-        GetGDLParametersOfElements returns.
+        given Window, Door and Change Marker elements. The marker of an opening is the stamp
+        drawn next to it on the floor plan; its parameters are separate from the opening's own
+        GDL parameters, which GetGDLParametersOfElements returns. The marker of a Change Marker
+        is its marker head, e.g. with the texts typed into it; a Change Marker with only a cloud
+        has no marker and gets an error. GetDetailsOfElements gives the Change a Change Marker
+        is linked to.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
 
         Returns:
             list[ErrorItem | MarkerParametersOfElement]: The marker of each given element, in
-                the order of the input, or an error for an element that is not a window or a
-                door.
+                the order of the input, or an error for an element that is not a window, a door
+                or a change marker, or has no marker (a change marker with only a cloud).
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -2491,6 +2708,38 @@ class ElementCommands:
         validated_response = GetOpeningTransformationsResult.model_validate(response_dict)
         return validated_response.openingTransformations
 
+    def get_profile_values_of_elements(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[ElementProfileValues | ErrorItem]:
+        """
+        Returns the custom profiles walls, beams and columns use, with the values the element
+        gives them: the width and height of the stretched profile and the value of each profile
+        modifier, measured on the stretched profile of the element (one per Profile wall, one
+        per Profile segment of a beam or column). Read only: the Archicad API has no function
+        that writes an element's modifier values or stretch.
+
+        Args:
+            elements (list[ElementIdArrayItem])
+
+        Returns:
+            list[ElementProfileValues | ErrorItem]
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetProfileValuesOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetProfileValuesOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = GetProfileValuesOfElementsResult.model_validate(response_dict)
+        return validated_response.profileValuesOfElements
+
     def get_property_objects_of_elements(
         self, elements: list[ElementIdArrayItem]
     ) -> list[ElementPropertyObjects | ErrorItem]:
@@ -2535,20 +2784,23 @@ class ElementCommands:
         lengths etc.), together with the volume and projected area per building material (one
         item per skin of composite and complex profile elements, one item for basic elements).
         Supported types: Wall, Column, Beam, Slab, Roof, Shell, Morph, Zone, ColumnSegment,
-        BeamSegment. Use the optional minOpeningSize parameter to control the conditional
-        values, and calculateInOneCall to calculate all the elements in one Archicad call.
+        BeamSegment, Stair. Use the optional minOpeningSize parameter to control the conditional
+        values, and calculateInOneCall to calculate the elements of each type in one Archicad
+        call.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
             min_opening_size (None | float): Optional minimum opening size in square meters.
-                Openings smaller than this are not subtracted when the conditional values (for
-                example volumeConditional of a Wall) are calculated. Archicad only uses it for
-                walls. Default value is 0, so every opening is subtracted.
+                Openings smaller than this are not subtracted from the conditional surfaces of a
+                Wall (referenceSideSurfaceConditional and oppositeSideSurfaceConditional).
+                Archicad only uses it for walls; the conditional volume follows the project's
+                calculation rules instead. Default value is 0, so every opening is subtracted.
             calculate_in_one_call (None | bool): Optional. When true, Archicad calculates the
-                quantities of all the supported elements in one call instead of one call per
-                element, which can be faster for many elements. The output has the same format.
-                If that one call fails, every supported element gets the same error. Default
-                value is false.
+                quantities of all the supported elements of one type in one call (one call per
+                element type, because Archicad only calculates elements of the same type
+                together) instead of one call per element, which can be faster for many
+                elements. The output has the same format. If the call of a type fails, every
+                element of that type gets the same error. Default value is false.
 
         Returns:
             list[ElementQuantityDetails | ErrorItem]: The quantities of the elements, in the
@@ -2572,6 +2824,41 @@ class ElementCommands:
         )
         validated_response = GetQuantitiesOfElementsResult.model_validate(response_dict)
         return validated_response.quantitiesOfElements
+
+    def get_railing_segment_patterns(
+        self, elements: list[ElementIdArrayItem]
+    ) -> list[ErrorItem | RailingSegmentPatternsResult]:
+        """
+        Gets the pattern of each segment of the given railings, telling the entry apart from its
+        instances: the entry is the segment's pattern settings (distribution, panel, baluster
+        set with its spacing, baluster and inner post) that Archicad generates the pattern from,
+        the instances are the RailingPattern, RailingPanel, RailingBalusterSet and
+        RailingInnerPost subelements it generated for the segment, whose own settings
+        GetDetailsOfElements reads. Read only.
+
+        Args:
+            elements (list[ElementIdArrayItem]): The railings to read.
+
+        Returns:
+            list[ErrorItem | RailingSegmentPatternsResult]: One item per given element, in the
+                order of the input. An element that is not a railing, or whose segments cannot
+                be read, is represented by an error object.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+        }
+        validated_params = GetRailingSegmentPatternsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetRailingSegmentPatterns",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = GetRailingSegmentPatternsResult.model_validate(response_dict)
+        return validated_response.railings
 
     def get_relations_of_elements(
         self, elements: list[ElementIdArrayItem], other_element_type: ElementType | None = None
@@ -3428,6 +3715,349 @@ class ElementCommands:
         validated_response = PlaceOpeningsResult.model_validate(response_dict)
         return validated_response.elements
 
+    def recreate_angle_dimensions(
+        self, angle_dimensions: list[AngleDimensionRecreationData]
+    ) -> list[ErrorItem | RecreatedElement]:
+        """
+        Recreates Angle Dimension elements on new lines with a new arc position (firstLine,
+        secondLine and arcPosition, as CreateAngleDimensions takes them), because Archicad does
+        not move the lines or the arc of an angle dimension through ACAPI_Element_Change (seen
+        in Archicad 29). The new angle dimension is static, as CreateAngleDimensions creates it,
+        and is created in the current database, where the old one has to be. It gets the old
+        one's settings (pen, inner or outer arc, markers, witness lines, text pen, size, font,
+        style, position and direction, custom text and the rest of API_AngleDimensionType),
+        layer, story and renovation status, and its classifications, element categories and
+        property values, and its Element ID where Archicad gives angle dimensions one (Archicad
+        29 refuses an Element ID on them, so there is none to carry); the text goes back to its
+        automatic place on the new arc. The old angle dimension is then deleted. Each angle
+        dimension is recreated in its own undo step, and when any step fails nothing is changed
+        for it. The new angle dimension has a new GUID: the result maps the old GUID to the new
+        one and lists what could not be carried over (the group it was in).
+
+        Args:
+            angle_dimensions (list[AngleDimensionRecreationData]): The angle dimensions to
+                recreate on new lines, with a new arc position.
+
+        Returns:
+            list[ErrorItem | RecreatedElement]: One item per input angle dimension: the new
+                angle dimension, or an error. After an error nothing was changed for that angle
+                dimension. The old one leaves its group.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "angleDimensions": angle_dimensions,
+        }
+        validated_params = RecreateAngleDimensionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RecreateAngleDimensions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = RecreateAngleDimensionsResult.model_validate(response_dict)
+        return validated_response.results
+
+    def recreate_curtain_walls(
+        self, curtain_walls: list[CurtainWallRecreationData]
+    ) -> list[ErrorItem | RecreatedElement]:
+        """
+        Recreates Curtain Wall elements on a new reference line with more or fewer segments, as
+        CreateCurtainWalls takes it, because ModifyCurtainWalls can only keep the number of
+        segments; or with a new height or slant angle, which Archicad does not apply to an
+        existing slanted curtain wall through ACAPI_Element_Change (seen in Archicad 29).
+        Without coordinates the old reference line is kept. The new curtain wall is created with
+        the old one as templateElementId, so it gets its frame and panel classes, pattern,
+        surfaces, boundary and corner frames, height, home story and base, layer and slant
+        angle, unless height or angle is given; it also gets its Element ID, renovation status,
+        classifications, element categories, property values, solid element operations and
+        trims, and the old curtain wall is then deleted. Each curtain wall is recreated in its
+        own undo step, and when any step fails nothing is changed for that curtain wall. The
+        result lists what could not be carried over (labels, dimensions, group). Frames and
+        panels changed one by one on the old curtain wall are generated again from its classes
+        and pattern, as when it is drawn again in Archicad.
+
+        Args:
+            curtain_walls (list[CurtainWallRecreationData]): The curtain walls to recreate on a
+                new reference line, with a new height or with a new slant. Give at least one of
+                coordinates, height and angle.
+
+        Returns:
+            list[ErrorItem | RecreatedElement]: One item per input curtain wall: the new curtain
+                wall, or an error. After an error nothing was changed for that curtain wall. Its
+                labels are deleted with it, dimensions measuring it lose those witness points or
+                are deleted, and it leaves its group.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "curtainWalls": curtain_walls,
+        }
+        validated_params = RecreateCurtainWallsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RecreateCurtainWalls",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = RecreateCurtainWallsResult.model_validate(response_dict)
+        return validated_response.results
+
+    def recreate_doors(self, doors: list[DoorRecreationData]) -> list[ErrorItem | RecreatedElement]:
+        """
+        Recreates Door elements in another wall (ownerWallId, optionally at a new centerOffset
+        along it), because Archicad does not move a door into another wall through
+        ACAPI_Element_Change: it keeps its owner (seen in Archicad 29). The new door is created
+        as CreateDoors creates one, from the Door tool defaults with the tool's marker, with the
+        old door's settings (size, sill, anchor, reveal, sides, pens, line types, surfaces and
+        the rest of API_DoorType), library part and GDL parameters, layer and renovation status;
+        its marker gets the old marker's parameters when both are of the same marker library
+        part. It also gets the old door's Element ID, classifications, element categories and
+        property values, and the old door is then deleted. Each door is recreated in its own
+        undo step, and when any step fails nothing is changed for that door. The new door has a
+        new GUID: the result maps the old GUID to the new one and lists what could not be
+        carried over (labels, dimensions of the current database that measured the old door,
+        group).
+
+        Args:
+            doors (list[DoorRecreationData]): The doors to recreate in another wall.
+
+        Returns:
+            list[ErrorItem | RecreatedElement]: One item per input door: the new door, or an
+                error. After an error nothing was changed for that door. Labels of the old door
+                are deleted with it, dimensions measuring it lose those witness points or are
+                deleted, and it leaves its group.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "doors": doors,
+        }
+        validated_params = RecreateDoorsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RecreateDoors",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = RecreateDoorsResult.model_validate(response_dict)
+        return validated_response.results
+
+    def recreate_railings(self, railings: list[RailingRecreationData]) -> list[ErrorItem | RecreatedElement]:
+        """
+        Recreates Railing elements on a new reference line - with more or fewer nodes and
+        segments, in 2D as CreateRailings takes it or with an elevation per node and arcs as
+        CreateRailingsFromPolyline takes it - because the Archicad API cannot change the
+        reference line of an existing railing. The new railing is created with the old one as
+        templateElementId, so it gets its node and segment settings, posts, rails, handrails,
+        toprails, panels and balusters, story visibility, pens, layer, home story and bottom
+        offset; it also gets its Element ID, renovation status, classifications, element
+        categories, property values, solid element operations and trims, and the old railing is
+        then deleted. Each railing is recreated in its own undo step, and when any step fails
+        nothing is changed for that railing. The result lists what could not be carried over
+        (labels, dimensions, group). Settings given to single segments, nodes or posts of the
+        old railing are not carried over: the new ones are generated from the railing's
+        defaults, as when it is drawn again in Archicad.
+
+        Args:
+            railings (list[RailingRecreationData]): The railings to recreate on a new reference
+                line.
+
+        Returns:
+            list[ErrorItem | RecreatedElement]: One item per input railing: the new railing, or
+                an error. After an error nothing was changed for that railing. Its labels are
+                deleted with it, dimensions measuring it lose those witness points or are
+                deleted, and it leaves its group. The link of a railing to the slab or stair it
+                was placed on cannot be read through the Archicad API, so it is not listed in
+                notCarriedOver: the new railing has none.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "railings": railings,
+        }
+        validated_params = RecreateRailingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RecreateRailings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = RecreateRailingsResult.model_validate(response_dict)
+        return validated_response.results
+
+    def recreate_skylights(self, skylights: list[SkylightRecreationData]) -> list[ErrorItem | RecreatedElement]:
+        """
+        Recreates Skylight elements on another roof or shell (ownerId, optionally at a new
+        anchorPosition on it), because Archicad does not move a skylight onto another roof or
+        shell through ACAPI_Element_Change: it keeps its owner (seen in Archicad 29). The new
+        skylight is created as CreateSkylights creates one, from the Skylight tool defaults,
+        with the old skylight's settings (size, anchor point, fix mode, azimuth, pens, line
+        types, surfaces and the rest of API_SkylightType), library part and GDL parameters,
+        layer and renovation status; Archicad sets its plane, level and elevation angle from the
+        new owner. It also gets the old skylight's Element ID, classifications, element
+        categories and property values, and the old skylight is then deleted. Each skylight is
+        recreated in its own undo step, and when any step fails nothing is changed for that
+        skylight. The new skylight has a new GUID: the result maps the old GUID to the new one
+        and lists what could not be carried over (labels, dimensions of the current database
+        that measured the old skylight, group).
+
+        Args:
+            skylights (list[SkylightRecreationData]): The skylights to recreate on another roof
+                or shell.
+
+        Returns:
+            list[ErrorItem | RecreatedElement]: One item per input skylight: the new skylight,
+                or an error. After an error nothing was changed for that skylight. Labels of the
+                old skylight are deleted with it, dimensions measuring it lose those witness
+                points or are deleted, and it leaves its group.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "skylights": skylights,
+        }
+        validated_params = RecreateSkylightsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RecreateSkylights",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = RecreateSkylightsResult.model_validate(response_dict)
+        return validated_response.results
+
+    def recreate_stairs(self, stairs: list[StairRecreationData]) -> list[ErrorItem | RecreatedElement]:
+        """
+        Recreates Stair elements on a new baseline (with its landings, winders and curved edges,
+        as CreateStairs takes it), because the Archicad API cannot change the baseline of an
+        existing stair. The new stair gets the old one's settings (everything ModifyStairs
+        writes, its baseline position, rules and top link), Element ID, layer, home story and
+        base offset, renovation status, classifications, element categories and property values,
+        and its solid element operations (on Archicad 27 without their link flags, which the API
+        cannot read there) and roof or shell trims; the old stair is then deleted. Each stair is
+        recreated in its own undo step, and when any step fails nothing is changed for that
+        stair. The new stair has a new GUID: the result maps the old GUID to the new one and
+        lists what could not be carried over (associative labels, dimensions of the current
+        database that measured the old stair, and the group it was in). Archicad lays out the
+        boundaries and the walking lines of the new stair again from its baseline and flight
+        width, so boundaries or a walking line edited by hand on the old stair are not carried
+        over; the API cannot write them, so an item that gives one is refused and the stair is
+        left as it was.
+
+        Args:
+            stairs (list[StairRecreationData]): The stairs to recreate on a new baseline.
+
+        Returns:
+            list[ErrorItem | RecreatedElement]: One item per input stair: the new stair, or an
+                error. After an error nothing was changed for that stair. Labels of the old
+                stair are deleted with it; dimensions measuring it lose those witness points or
+                are deleted.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "stairs": stairs,
+        }
+        validated_params = RecreateStairsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RecreateStairs",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = RecreateStairsResult.model_validate(response_dict)
+        return validated_response.results
+
+    def recreate_windows(self, windows: list[WindowRecreationData]) -> list[ErrorItem | RecreatedElement]:
+        """
+        Recreates Window elements in another wall (ownerWallId, optionally at a new centerOffset
+        along it), because Archicad does not move a window into another wall through
+        ACAPI_Element_Change: it keeps its owner (seen in Archicad 29). The new window is
+        created as CreateWindows creates one, from the Window tool defaults with the tool's
+        marker, with the old window's settings (size, sill, anchor, reveal, sides, pens, line
+        types, surfaces and the rest of API_WindowType), library part and GDL parameters, layer
+        and renovation status; its marker gets the old marker's parameters when both are of the
+        same marker library part. It also gets the old window's Element ID, classifications,
+        element categories and property values, and the old window is then deleted. Each window
+        is recreated in its own undo step, and when any step fails nothing is changed for that
+        window. The new window has a new GUID: the result maps the old GUID to the new one and
+        lists what could not be carried over (labels, dimensions of the current database that
+        measured the old window, group).
+
+        Args:
+            windows (list[WindowRecreationData]): The windows to recreate in another wall.
+
+        Returns:
+            list[ErrorItem | RecreatedElement]: One item per input window: the new window, or an
+                error. After an error nothing was changed for that window. Labels of the old
+                window are deleted with it, dimensions measuring it lose those witness points or
+                are deleted, and it leaves its group.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "windows": windows,
+        }
+        validated_params = RecreateWindowsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RecreateWindows",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = RecreateWindowsResult.model_validate(response_dict)
+        return validated_response.results
+
+    def recreate_zones(self, zones: list[ZoneRecreationData]) -> list[ErrorItem | RecreatedElement]:
+        """
+        Recreates automatic Zone elements as manual zones (makeManual), because Archicad does
+        not turn an automatic zone into a manual one through ACAPI_Element_Change (seen in
+        Archicad 29). The new manual zone has the polygon the old zone has now (with its arcs
+        and holes, as GetDetailsOfElements returns it), so it no longer follows its boundaries
+        when the zones are updated; it gets the old zone's category, name, number, stamp library
+        part, stamp position and stamp parameters, levels, contour, cover fill, surface and the
+        rest of API_ZoneType, layer and renovation status, and its Element ID, classifications,
+        element categories and property values. The old zone is deleted first, since a new zone
+        with its polygon would overlap it; a new zone that would overlap another zone of the
+        story is refused, as CreateZones refuses it, unless allowOverlap is true. Each zone is
+        recreated in its own undo step, and when any step fails nothing is changed for that
+        zone. The new zone has a new GUID: the result maps the old GUID to the new one and lists
+        what could not be carried over (labels, dimensions of the current database that measured
+        the old zone, group).
+
+        Args:
+            zones (list[ZoneRecreationData]): The zones to recreate as manual zones.
+
+        Returns:
+            list[ErrorItem | RecreatedElement]: One item per input zone: the new manual zone, or
+                an error. After an error nothing was changed for that zone. Labels of the old
+                zone are deleted with it, dimensions measuring it lose those witness points or
+                are deleted, and it leaves its group.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "zones": zones,
+        }
+        validated_params = RecreateZonesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RecreateZones",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = RecreateZonesResult.model_validate(response_dict)
+        return validated_response.results
+
     def refresh_elements(
         self, elements: list[ElementIdArrayItem], force: None | bool = None
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -3704,12 +4334,13 @@ class ElementCommands:
         """
         Scales elements on the floor plan or in the current 2D view by a factor around a center
         point with Archicad's Resize edit, in one undo step. Resize scales X and Y by the same
-        ratio, so factorY, if given, must equal factor. Supported types: Wall, Column, Beam,
-        Slab, Roof, Mesh, Zone, Line, PolyLine, Arc, Circle, Spline, Hatch and Hotspot. An
-        element of another type (library parts such as objects, lamps, doors and windows,
-        stairs, railings, curtain walls, shells, morphs, texts, subelements, dimensions, labels,
-        ...) or one that cannot be edited gets a failed execution result naming the reason, and
-        the other elements are still scaled.
+        ratio, so factorY, if given, must equal factor. Elevations are kept: a beam, whose
+        absolute elevation Resize would scale too, gets its story and level back after the
+        resize. Supported types: Wall, Column, Beam, Slab, Roof, Mesh, Zone, Line, PolyLine,
+        Arc, Circle, Spline, Hatch and Hotspot. An element of another type (library parts such
+        as objects, lamps, doors and windows, stairs, railings, curtain walls, shells, morphs,
+        texts, subelements, dimensions, labels, ...) or one that cannot be edited gets a failed
+        execution result naming the reason, and the other elements are still scaled.
 
         Args:
             elements (list[ElementIdArrayItem]): The elements to scale: Wall, Column, Beam,
@@ -3745,6 +4376,59 @@ class ElementCommands:
         )
         validated_response = ScaleElementsResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def set_category_values_of_defaults(
+        self,
+        element_types: list[ElementType],
+        category_values: list[DefaultCategoryValueData],
+        dry_run: None | bool = None,
+    ) -> SetCategoryValuesOfDefaultsResult:
+        """
+        Sets the category values (Structural Function, Position, Renovation Status ...) of the
+        tool defaults of the given element types: the values new elements of the type get, as
+        the Renovation palette does for the Renovation Status. Every given category value is set
+        for every given element type, in a single undoable step, and read back. The value must
+        belong to the given category, as GetElementCategories lists them. The executionResults
+        have one item per element type and category value: for each element type, in the order
+        of the input, one per item of categoryValues, in their order. An element type without
+        that category, or a value Archicad did not keep, gets a failed execution result. The
+        names are localized: use the type and the categoryValueId in scripts. With dryRun true
+        nothing is changed and no undo step is created: the response has dryRun set to true, and
+        each item that passes the checks made before writing gets wouldChange, with the
+        default's value in the category now (oldValue) and the value a real run would set
+        (newValue).
+
+        Args:
+            element_types (list[ElementType]): The element types whose tool defaults (the
+                settings new elements get) are set.
+            category_values (list[DefaultCategoryValueData]): The category values to set for
+                every element type: one category per item.
+            dry_run (None | bool): If true, the command makes all the checks of a real run and
+                resolves the same targets, with the same errors, but changes nothing in the
+                project and creates no undo step. The response is that of a real run with
+                "dryRun": true added, and says for each target what the real run would do.
+                Default is false.
+
+        Returns:
+            SetCategoryValuesOfDefaultsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementTypes": element_types,
+            "categoryValues": category_values,
+            "dryRun": dry_run,
+        }
+        validated_params = SetCategoryValuesOfDefaultsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetCategoryValuesOfDefaults",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = SetCategoryValuesOfDefaultsResult.model_validate(response_dict)
+        return validated_response
 
     def set_category_values_of_elements(
         self, element_category_values: list[ElementCategoryValueData]
@@ -3840,21 +4524,23 @@ class ElementCommands:
         ratio, start and end angle (arcs only), reflected, pen, line type, room separator;
         Polyline - points and arcs, pen, line type, room separator; Spline - pen, line type,
         room separator; Hatch - outline, holes, contour pen, fill pen and background pen or
-        colors, fill or building material, area display, room special and fill orientation;
-        Hotspot - position, height, pen; Text - text, position, angle, height, justification;
-        Label - the text of a text label; Drawing - position, angle, ratio, model offset, clip
-        polygon (isCutWithFrame), name, ID and numbering, scale in Autotext, border, title
-        library part, pen table (penTableUsageMode, penTableIndex), colorMode,
-        isTransparentBackground, rasterizeDPI and the anchor (anchorPoint,
+        colors, fill or building material, area display, room special, fill orientation, fill
+        category and contour line type; Hotspot - position, height, pen; Text - text, position,
+        angle, height, justification; Label - the text of a text label; Drawing - position,
+        angle, ratio, model offset, clip polygon (isCutWithFrame), name, ID and numbering, scale
+        in Autotext, border, title library part, pen table (penTableUsageMode, penTableIndex),
+        colorMode, isTransparentBackground, rasterizeDPI and the anchor (anchorPoint,
         useOwnOriginAsAnchor). Not written, because the Archicad API does not take them: the
         geometry of a Spline, the source of a Drawing (use ChangeDrawingLink), the Drawing
         Manager's update type and stored in project, and often a placed Drawing's drawingScale,
         which comes from its source view (the element's result then names the kept value). Other
         wall, slab, column, beam, stair and object settings are written by their Modify
-        commands. An element Archicad does not let you edit (its layer is hidden or locked, it
-        is locked, or it is not reserved by you in teamwork) gets a failed execution result
-        naming the reason; a Drawing setting Archicad kept unchanged is named in a failed
-        execution result too.
+        commands, and the name, ID and clip polygon of Detail and Worksheet markers by
+        ModifyDetailMarkers: typeSpecificDetails given for a Detail or Worksheet marker fail the
+        item, and nothing of it is changed. An element Archicad does not let you edit (its layer
+        is hidden or locked, it is locked, or it is not reserved by you in teamwork) gets a
+        failed execution result naming the reason; a Drawing setting Archicad kept unchanged is
+        named in a failed execution result too.
 
         Args:
             elements_with_details (list[ElementsWithDetail]): The elements with parameters.
@@ -3878,6 +4564,44 @@ class ElementCommands:
         )
         validated_response = SetDetailsOfElementsResult.model_validate(response_dict)
         return validated_response.executionResults
+
+    def set_element_fields(
+        self, elements_with_fields: list[ElementFieldsUpdate], dry_run: None | bool = None
+    ) -> SetElementFieldsResult:
+        """
+        Writes fields of elements by their path in the element's struct in the Archicad API (see
+        GetElementFieldDefinitions), with ACAPI_Element_Change and a mask of exactly the given
+        fields, in one undoable command. Each value is read back afterwards: one Archicad did
+        not keep is reported as a failure that names the field and the value Archicad kept.
+
+        Args:
+            elements_with_fields (list[ElementFieldsUpdate]): The elements to change and the
+                fields to write to each.
+            dry_run (None | bool): If true, the command makes all the checks of a real run and
+                resolves the same targets, with the same errors, but changes nothing in the
+                project and creates no undo step. The response is that of a real run with
+                "dryRun": true added, and says for each target what the real run would do.
+                Default is false.
+
+        Returns:
+            SetElementFieldsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementsWithFields": elements_with_fields,
+            "dryRun": dry_run,
+        }
+        validated_params = SetElementFieldsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetElementFields",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = SetElementFieldsResult.model_validate(response_dict)
+        return validated_response
 
     def set_element_info_strings(
         self, elements: list[ElementInfoString]
@@ -3918,6 +4642,7 @@ class ElementCommands:
         notify_on_reservation_changes: None | bool = None,
         *,
         element_types_to_observe: None | list[ElementType] = None,
+        elements_to_observe: None | list[ElementIdArrayItem] = None,
         notify_on_selection_change: None | bool = None,
         notify_on_window_change: None | bool = None,
         notify_on_project_events: None | bool = None,
@@ -3945,22 +4670,23 @@ class ElementCommands:
                 of an element. The observed elements are the ones ACAPI_Element_GetElemList
                 returns, for API_ZombieElemID or, with elementTypesToObserve, for each of those
                 types, when the first client asking for these notifications of them is
-                registered, and every element of the observed types created after that. Archicad
-                does not report the changes made by Tapir's own commands, so Tapir reports them
-                itself for SetDetailsOfElements, SetPropertyValuesOfElements, MoveElements,
-                RotateElements, MirrorElements (not for the copies they make, which are new
-                elements), DeleteElements, DeleteSelectedElements, the Modify<Tool> commands
-                (ModifyWalls, ModifyBeams, ModifySlabs, ModifyColumns, ModifyWindows,
-                ModifyDoors, ModifyOpenings, ModifyMorphs, ModifyRoofs, ModifyShells,
-                ModifyMeshes, ModifyObjects, ModifyLamps, ModifyTexts, ModifyLabels,
-                ModifyCurtainWalls, ModifyCurtainWallFrames, ModifyZones, ModifySections,
-                ModifyDetailMarkers, ModifyRailings, ModifyStairs), ChangeTextContent,
-                SetGDLParametersOfElements, RunParameterScriptOfElements (only when the script
-                changed the element), SetMarkerParametersOfElements,
-                SetMarkerLibraryPartOfElements, ChangeLibraryPartOfElements,
-                SetClassificationsOfElements, SetCategoryValuesOfElements,
-                ModifyPropertyValueOfElements, SetElementInfoStrings,
-                SetURLReferencesOfElements, SetIFCAttributesOfElements,
+                registered, and every element of the observed types created after that, plus the
+                elements listed in elementsToObserve. Archicad does not report the changes made
+                by Tapir's own commands, so Tapir reports them itself for SetDetailsOfElements,
+                SetPropertyValuesOfElements, MoveElements, RotateElements, MirrorElements (not
+                for the copies they make, which are new elements), DeleteElements,
+                DeleteSelectedElements, the Modify<Tool> commands (ModifyWalls, ModifyBeams,
+                ModifySlabs, ModifyColumns, ModifyWindows, ModifyDoors, ModifyOpenings,
+                ModifyMorphs, ModifyRoofs, ModifyShells, ModifyMeshes, ModifyObjects,
+                ModifyLamps, ModifyTexts, ModifyLabels, ModifyCurtainWalls,
+                ModifyCurtainWallFrames, ModifyZones, ModifySections, ModifyDetailMarkers,
+                ModifyRailings, ModifyStairs, ModifyPolylines, ModifyHatches,
+                ModifyChangeMarkers), ChangeTextContent, SetGDLParametersOfElements,
+                RunParameterScriptOfElements (only when the script changed the element),
+                SetMarkerParametersOfElements, SetMarkerLibraryPartOfElements,
+                ChangeLibraryPartOfElements, SetClassificationsOfElements,
+                SetCategoryValuesOfElements, ModifyPropertyValueOfElements,
+                SetElementInfoStrings, SetURLReferencesOfElements, SetIFCAttributesOfElements,
                 SetIFCPropertiesOfElements, RemoveIFCPropertiesOfElements,
                 SetIFCClassificationReferencesOfElements,
                 RemoveIFCClassificationReferencesOfElements, LockElements, UnlockElements,
@@ -3986,21 +4712,37 @@ class ElementCommands:
                 "PreservedDirectionStretch" or "General"; the changes made by Tapir's own
                 commands and by undo or redo have no transformation. Optional parameter, by
                 default true. Archicad attaches an observer to each element to observe (see
-                elementTypesToObserve) when the first client asks for this, and detaches them
-                when the last one stops, and it is blocked meanwhile: the time grows faster than
-                the number of elements, from seconds for a few hundred elements to many minutes
-                for a few thousand. Count the elements first (GetAllElements with
-                IncludeSubElemObjects, or GetElementsByType) and limit the types on large
-                projects.
+                elementTypesToObserve and elementsToObserve) when the first client asks for
+                this, and detaches them when the last one stops, and it is blocked meanwhile:
+                one element at a time (the Archicad API has no call for many elements or a whole
+                type), about 10 elements per second on a large project, and the time grows
+                faster than the number of elements. Count the elements first (GetAllElements
+                with IncludeSubElemObjects, or GetElementsByType) and limit the types, or list
+                the elements with elementsToObserve, on large projects.
             notify_on_reservation_changes (None | bool): Notify on reservation changes of an
                 element. Optional parameter, by default true.
             element_types_to_observe (None | list[ElementType]): Only modifications/deletions of
-                elements of these types are observed and notified to this client. Optional
-                parameter, by default every element (including the parts of curtain walls,
-                stairs and railings, which are most of the elements of large projects).
-                Registering the same client again with other types changes them; only the
-                elements of types no client observed before get an observer then. Does not limit
-                the other notifications.
+                elements of these types are observed and notified to this client, together with
+                the elements of elementsToObserve. Optional parameter, by default (when neither
+                elementTypesToObserve nor elementsToObserve is given) every element (including
+                the parts of curtain walls, stairs and railings, which are most of the elements
+                of large projects). Registering the same client again with other types changes
+                them; only the elements of types no client observed before get an observer then.
+                Does not limit the other notifications.
+            elements_to_observe (None | list[ElementIdArrayItem]): Only modifications/deletions
+                of these elements are observed and notified to this client, together with the
+                elements of the types of elementTypesToObserve. Only these elements get an
+                observer, so registering takes time in proportion to their number, not to the
+                size of the project (#2493). Unlike elementTypesToObserve, it does not cover the
+                elements created later: with elementsToObserve alone, the changes of a new
+                element are not notified (notifyOnNewElement still reports its creation);
+                register the client again with the new element in the list to observe it. A
+                listed element that does not exist fails the command, and the client is then not
+                registered or changed. Registering the same client again with another list
+                changes it; only the elements no client observed before get an observer then,
+                and the ones no client needs any more lose theirs. Optional parameter, by
+                default every element (see elementTypesToObserve). Does not limit the other
+                notifications.
             notify_on_selection_change (None | bool): Notify when the selection changes. The
                 message is {"selectedElements": [...]}: the whole current selection, each item
                 an elementId as in the response of GetSelectedElements, an empty list when
@@ -4118,6 +4860,7 @@ class ElementCommands:
             "notifyOnNewElement": notify_on_new_element,
             "notifyOnModificationOfAnElement": notify_on_modification_of_an_element,
             "elementTypesToObserve": element_types_to_observe,
+            "elementsToObserve": elements_to_observe,
             "notifyOnReservationChanges": notify_on_reservation_changes,
             "notifyOnSelectionChange": notify_on_selection_change,
             "notifyOnWindowChange": notify_on_window_change,
@@ -4141,6 +4884,48 @@ class ElementCommands:
         validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
+    def set_fields_of_element_defaults(
+        self, fields_of_element_defaults: list[ToolDefaultFieldsUpdate], dry_run: None | bool = None
+    ) -> SetFieldsOfElementDefaultsResult:
+        """
+        Writes fields of the tool defaults of element types by their path in the element's
+        struct in the Archicad API (see GetElementFieldDefinitions), with
+        ACAPI_Element_ChangeDefaults and a mask of exactly the given fields: the elements
+        created afterwards get them. Like the settings dialogs of the tools, it is not undoable.
+        Each value is read back afterwards: one Archicad did not keep is reported as a failure
+        that names the field and the value Archicad kept. A change Archicad refuses can still
+        have written some of the given fields (seen with libInd, the library part, which
+        Archicad refuses in the tool defaults): the failure names them.
+
+        Args:
+            fields_of_element_defaults (list[ToolDefaultFieldsUpdate]): The element types whose
+                tool defaults change and the fields to write to each.
+            dry_run (None | bool): If true, the command makes all the checks of a real run and
+                resolves the same targets, with the same errors, but changes nothing in the
+                project and creates no undo step. The response is that of a real run with
+                "dryRun": true added, and says for each target what the real run would do.
+                Default is false.
+
+        Returns:
+            SetFieldsOfElementDefaultsResult
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "fieldsOfElementDefaults": fields_of_element_defaults,
+            "dryRun": dry_run,
+        }
+        validated_params = SetFieldsOfElementDefaultsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetFieldsOfElementDefaults",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = SetFieldsOfElementDefaultsResult.model_validate(response_dict)
+        return validated_response
+
     def set_gdl_parameters_of_elements(
         self, elements_with_gdl_parameters: list[ElementsWithGDLParameter]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -4153,13 +4938,19 @@ class ElementCommands:
         reporting a change that does not take effect; a frame without a library part (an
         invisible Boundary frame, for example) has no GDL parameters. The parameters are read
         back after the change, and a written parameter Archicad did not keep (e.g. one it sets
-        from the element's own settings, like AC_TextSize_1 of a label) gives a failed execution
-        result naming it. With dryRun true no element is changed and no undo step is created:
-        the parameters are written to the element's parameter list and its Parameter Script runs
-        as in a real run, the response has dryRun set to true, and each element that passes the
-        checks made before changing it gets wouldChange, listing the parameters a real run would
-        change (the given ones and the ones the Parameter Script changes with them) with their
-        old and new values.
+        from the element's own settings, like AC_TextSize_1 of a label, or one the object's
+        Parameter Script sets back) gives a failed execution result naming it: each given value
+        (a whole array too, but not A, B or a single array item) is compared with the value read
+        back. With dryRun true no element is changed and no undo step is created: the parameters
+        are written to the element's parameter list and its Parameter Script runs as in a real
+        run, the response has dryRun set to true, and each element that passes the checks made
+        before changing it gets wouldChange, listing the parameters a real run would change (the
+        given ones and the ones the Parameter Script changes with them) with their old and new
+        values. The railing components GetSubelementsOfHierarchicalElements lists (posts, rails,
+        balusters, panels ...) have no parameter session in the Archicad API: their parameters
+        are written to the component itself, no Parameter Script runs (a dry run lists only the
+        given parameters), array parameters are not supported, and a value Archicad does not
+        keep (one the railing's settings set) gives a failed execution result naming it.
 
         Args:
             elements_with_gdl_parameters (list[ElementsWithGDLParameter]): The elements with GDL
@@ -4205,12 +4996,19 @@ class ElementCommands:
         a frame without a library part (an invisible Boundary frame, for example) has no GDL
         parameters. The parameters are read back after the change, and a written parameter
         Archicad did not keep (e.g. one it sets from the element's own settings, like
-        AC_TextSize_1 of a label) gives a failed execution result naming it. With dryRun true no
-        element is changed and no undo step is created: the parameters are written to the
-        element's parameter list and its Parameter Script runs as in a real run, the response
-        has dryRun set to true, and each element that passes the checks made before changing it
-        gets wouldChange, listing the parameters a real run would change (the given ones and the
-        ones the Parameter Script changes with them) with their old and new values.
+        AC_TextSize_1 of a label, or one the object's Parameter Script sets back) gives a failed
+        execution result naming it: each given value (a whole array too, but not A, B or a
+        single array item) is compared with the value read back. With dryRun true no element is
+        changed and no undo step is created: the parameters are written to the element's
+        parameter list and its Parameter Script runs as in a real run, the response has dryRun
+        set to true, and each element that passes the checks made before changing it gets
+        wouldChange, listing the parameters a real run would change (the given ones and the ones
+        the Parameter Script changes with them) with their old and new values. The railing
+        components GetSubelementsOfHierarchicalElements lists (posts, rails, balusters, panels
+        ...) have no parameter session in the Archicad API: their parameters are written to the
+        component itself, no Parameter Script runs (a dry run lists only the given parameters),
+        array parameters are not supported, and a value Archicad does not keep (one the
+        railing's settings set) gives a failed execution result naming it.
 
         Args:
             elements_with_gdl_parameters (list[ElementsWithGDLParameter]): The elements with GDL
@@ -4313,8 +5111,9 @@ class ElementCommands:
         self, elements_with_marker_parameters: list[ElementWithMarkerParameters]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
-        Sets the given GDL parameters of the marker of the given Window and Door elements. The
-        opening's own settings and the other marker parameters are left as they are.
+        Sets the given GDL parameters of the marker of the given Window, Door and Change Marker
+        elements (the marker head of a Change Marker). The element's own settings and the other
+        marker parameters are left as they are.
 
         Args:
             elements_with_marker_parameters (list[ElementWithMarkerParameters]): The elements
@@ -4587,10 +5386,15 @@ class ElementCommands:
 
     def solve_stair_baseline(self, stairs_data: list[StairBaselineData]) -> list[ErrorItem | StairBaselineSolution]:
         """
-        Runs the Archicad stair solver on the given Stair baselines and parameters without
-        creating any element. Returns for each one whether the baseline was already correct,
-        could be solved or could not be solved, with the baseline and the main stair settings
-        after solving. Available from Archicad 27.
+        Runs the Archicad stair solver on the given Stair baselines (straight or with curved
+        edges) and parameters without creating any element. Returns for each one whether the
+        baseline was already correct, could be solved or could not be solved, with the baseline
+        and the main stair settings after solving, and the Rules and Standards (riser height and
+        going limits, 2R+G, R+G, R/G, pitch) CreateStairs would lay the steps out by, with a
+        given treadDepth pinned as CreateStairs pins it. The solver checks the baseline only: it
+        does not lay out the steps, so stepNum, riserHeight and treadDepth are the given values
+        or the tool defaults, and CreateStairs picks the riser count and height for totalHeight
+        within the rules. Available from Archicad 27.
 
         Args:
             stairs_data (list[StairBaselineData]): Array of Stair data to check, with the same

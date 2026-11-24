@@ -58,6 +58,9 @@ from .types import (
     AnalyticalSurfaceLoadDetails,
     AnalyticalSurfaceMemberDetails,
     AnalyticalVisibilitySettings,
+    AngleDimensionData,
+    AngleDimensionRecreationData,
+    AngleDimensionWithDetails,
     AngleUnitFormat,
     ArcData,
     AssociativeDimensionData,
@@ -111,7 +114,15 @@ from .types import (
     CalculationUnitPreferencesUpdate,
     CalculationUnitVolumeFormat,
     Camera,
+    CameraData,
+    CameraModificationData,
     CameraSet,
+    CameraSetData,
+    CameraSetModificationData,
+    Change,
+    ChangeMarkerData,
+    ChangeMarkerWithDetails,
+    ChangedLayoutSubset,
     CircleData,
     ClassificationIdArrayItem,
     ClassificationItemConflictPolicy,
@@ -158,6 +169,8 @@ from .types import (
     CurtainWallAbsoluteBottom,
     CurtainWallData,
     CurtainWallFrameWithDetails,
+    CurtainWallPanelWithDetails,
+    CurtainWallRecreationData,
     CurtainWallWithDetails,
     CurveApproximation,
     CustomSchemeItem,
@@ -168,6 +181,7 @@ from .types import (
     DatabaseId,
     DatabaseIdArrayItem,
     DatabaseType,
+    DefaultCategoryValueData,
     DefaultCategoryValues,
     DefaultPropertyAvailability,
     Defaults,
@@ -203,10 +217,12 @@ from .types import (
     Direction,
     Document3DAttributeOptions,
     Document3DBoundaryDisplay,
+    Document3DData,
     Document3DPlanConnection,
     Document3DSettings,
     DocumentRevision,
     DoorData,
+    DoorRecreationData,
     DoorWithDetails,
     DrawingContentBox,
     DrawingData,
@@ -250,6 +266,9 @@ from .types import (
     ElementDetailsAdditionalField,
     ElementDetailsField,
     ElementDrawingPrimitives,
+    ElementFieldDefinition,
+    ElementFieldValues,
+    ElementFieldsUpdate,
     ElementFilter,
     ElementFromAnalyticalMember,
     ElementFromCurveMemberData,
@@ -281,11 +300,10 @@ from .types import (
     ElementMEPRoutingParameters,
     ElementMirrorData,
     ElementNotSplit,
-    ElementPair,
+    ElementProfileValues,
     ElementPropertyEditabilityResult,
     ElementPropertyObjects,
-    ElementPropertyValueWithStatus,
-    ElementPropertyValueWithValue,
+    ElementPropertyValue,
     ElementQuantityDetails,
     ElementReservationStatus,
     ElementSetData,
@@ -298,6 +316,7 @@ from .types import (
     ElementSurfaceTypes,
     ElementTextureCoordinates,
     ElementTriangulation,
+    ElementTrimPair,
     ElementTrims,
     ElementType,
     ElementTypeFloorLayerFilter,
@@ -339,6 +358,7 @@ from .types import (
     FavoriteKeepField,
     FavoriteNameAndFolder,
     FavoriteRename,
+    FavoriteSettingGroup,
     FavoriteSettings,
     FavoriteSettingsSource,
     FavoriteSummary,
@@ -386,6 +406,7 @@ from .types import (
     Guid,
     GuidId,
     HatchData,
+    HatchWithDetails,
     HierarchicalElementOwner,
     HierarchicalOwnerMode,
     HighlightedColor,
@@ -401,6 +422,7 @@ from .types import (
     HotlinkNodeChange,
     HotlinkNodeCreated,
     HotlinkNodeReference,
+    HotlinkOrigin,
     HotlinkOwnersOfElement,
     HotlinkProxyElementTable,
     HotlinkSourceReference,
@@ -419,6 +441,7 @@ from .types import (
     ImportedAttributesByType,
     InputConstraint,
     InteriorElevationData,
+    InteriorElevationWithDetails,
     InterpretedAutoText,
     Issue,
     IssueCommentStatus,
@@ -445,6 +468,7 @@ from .types import (
     LayerCombinationAttribute,
     LayerCombinationDataArrayItem,
     LayerData,
+    LayerModificationData,
     Layers,
     LayersOfElementDefault,
     LayersOfElementDefaults,
@@ -453,6 +477,7 @@ from .types import (
     LayoutSetting,
     LayoutSettingsData,
     LayoutSubsetSettings,
+    LayoutSubsetSettingsChange,
     Length,
     LevelDimensionData,
     LevelDimensionsWithDetail,
@@ -561,6 +586,7 @@ from .types import (
     MEPRoutingElementData,
     MEPRoutingElementDetails,
     MEPRoutingElementModificationData,
+    MEPRoutingElementRebuildData,
     MEPRoutingParameters,
     MEPSystemAttribute,
     MEPSystemAttributeField,
@@ -590,6 +616,7 @@ from .types import (
     ModelViewOptionDetailsById,
     ModelViewOptionDetailsByName,
     ModelViewOptionId,
+    ModelViewOptions,
     ModulData,
     ModuleDataEntry,
     MorphData,
@@ -644,6 +671,8 @@ from .types import (
     PerspectiveProjectionSettings,
     PhotoRenderFormat,
     PickableAttributeType,
+    PictureData,
+    PictureWithDetails,
     PlaceInfo,
     PlaceSettingsUpdate,
     PlotterInfo,
@@ -652,6 +681,7 @@ from .types import (
     PolygonRegularizationData,
     PolylineData,
     PolylineRegularizationData,
+    PolylineWithDetails,
     PrintArea,
     PrinterInfo,
     PrinterPrintArea,
@@ -701,9 +731,14 @@ from .types import (
     PropertyValueErrorItem,
     PropertyValuesArrayItem,
     PublisherSet,
+    RadialDimensionData,
     RailingData,
     RailingFromPolylineData,
+    RailingRecreationData,
+    RailingSegmentPatternsResult,
     RailingsWithDetail,
+    RebuiltMEPRoutingElement,
+    RecreatedElement,
     References,
     RegularizedPolygons,
     RegularizedPolyline,
@@ -738,6 +773,7 @@ from .types import (
     SkippedLibraryPart,
     SkylightData,
     SkylightHolePolygon,
+    SkylightRecreationData,
     SkylightsWithDetail,
     SlabData,
     SlabWithDetails,
@@ -758,8 +794,11 @@ from .types import (
     StairBaselineData,
     StairBaselineSolution,
     StairData,
+    StairRecreationData,
     StairWithDetails,
     StoredGDLParameter,
+    Story,
+    StoryInsertionPosition,
     StoryParameters,
     StorySettings,
     Style3DDetails,
@@ -785,12 +824,14 @@ from .types import (
     TextMeasurementByFontName,
     TextsWithDetail,
     ToolDefaultClassifications,
+    ToolDefaultFieldsUpdate,
     ToolDefaultProperties,
     ToolDefaultPropertyEditabilityResult,
     ToolDefaultPropertyFilter,
     ToolboxItem,
     TraceMethod,
     TrimType,
+    TypedPropertyValuesForElement,
     UnitValueConversionData,
     UnusedAttributeTypeSummary,
     UnusedLibraryPart,
@@ -813,6 +854,7 @@ from .types import (
     WallThicknessDimensionData,
     WallWithDetails,
     WindowData,
+    WindowRecreationData,
     WindowToClose,
     WindowType,
     WindowWithDetails,
@@ -822,6 +864,7 @@ from .types import (
     WorksheetMarkerData,
     WouldChangeExecutionResult,
     WouldDeleteExecutionResult,
+    WouldDeleteStory,
     ZoneBoundariesOfZonesWrapper,
     ZoneBoundariesWrapper,
     ZoneCategoryAttribute,
@@ -830,6 +873,7 @@ from .types import (
     ZoneData,
     ZonePreferences,
     ZonePreferencesUpdate,
+    ZoneRecreationData,
     ZoneReductions,
     ZoneRelationsOfElement,
     ZoneSettings,
@@ -999,7 +1043,7 @@ class ApplyFavoritesToElementsParameters(APIModel):
     )
     applySettings: bool | None = Field(
         None,
-        description="Whether to apply the Favorite's settings-type parameters (structure, materials, pens, etc.). Geometry (position, floor, and dimensions such as a Wall's height) is never applied - the element stays on its own home story - except that a Window or Door takes the Favorite's library part and parameters, size included, while keeping its wall, marker and placement. For the hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-elements are not applied, because they are inseparable from the Favorite's own geometry. A Dimension's text size, text pen and text frame are not changed (tested in Archicad 28): the dimension creation commands take textHeight, textPen and textFrame for them. Default is true.",
+        description="Whether to apply the Favorite's settings-type parameters (structure, materials, pens, etc.). Geometry (position, floor, and dimensions such as a Wall's height) is never applied - the element stays on its own home story - except that a Window or Door takes the Favorite's library part and parameters, size included, while keeping its wall, marker and placement. A Stair keeps its own baseline and flight width. For the hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-elements are not applied, because they are inseparable from the Favorite's own geometry. A Dimension's text size, text pen and text frame are not changed (tested in Archicad 28): the dimension creation commands take textHeight, textPen and textFrame for them. Default is true.",
     )
     applyClassifications: bool | None = Field(
         None,
@@ -1015,7 +1059,12 @@ class ApplyFavoritesToElementsParameters(APIModel):
     )
     keepFields: list[FavoriteKeepField] | None = Field(
         None,
-        description="Fields of the target element to keep: after the Favorite has been applied, they are copied back from the target as it was before, so only the Favorite's other settings (e.g. its library part or wall type) take effect. 'id' and 'layerIndex' apply to every element type; 'width', 'height' and 'sillHeight' to a Window or Door ('width' and 'height' also to a Skylight); 'height', 'topOffset' and 'relativeTopStory' to a Wall or Column; 'referenceLineLocation' to a Wall. A field the target's type does not have is ignored. To keep a Wall's or Column's top exactly as it was, keep 'height', 'relativeTopStory' and 'topOffset' together - a kept 'height' alone is recomputed by Archicad while the Favorite's relativeTopStory links the top to a story. Default: nothing is kept.",
+        description="Fields of the target element to keep: after the Favorite has been applied, they are copied back from the target as it was before, so only the Favorite's other settings (e.g. its library part or wall type) take effect. 'id' and 'layerIndex' apply to every element type; 'width', 'height' and 'sillHeight' to a Window or Door ('width' and 'height' also to a Skylight); 'height', 'topOffset' and 'relativeTopStory' to a Wall or Column; 'referenceLineLocation' to a Wall; 'width' and 'depth' (the cross section) to a Column, and 'width' and 'height' (the cross section) to a Beam. The cross section of a Column or Beam is a Favorite setting and is applied unless it is kept. A field the target's type does not have is ignored. To keep a Wall's or Column's top exactly as it was, keep 'height', 'relativeTopStory' and 'topOffset' together - a kept 'height' alone is recomputed by Archicad while the Favorite's relativeTopStory links the top to a story. Default: nothing is kept.",
+    )
+    settingGroups: list[FavoriteSettingGroup] | None = Field(
+        None,
+        description="Apply only these panels of the Favorite's settings dialog, and nothing else of it - a positive list instead of keepFields. 'FloorPlanAndSection' applies the Floor Plan and Section settings: story visibility (Show on Stories), floor plan display and projection, the pens and line types of the cut, uncut, overhead and hidden lines (a Beam's reference axis too), the cut fill pens and the cover fill; geometry, size, cross section, building material, profile, layer and the other panels stay the target's. It is supported for Column and Beam elements; another element type gets a failed execution result and is left unchanged. 'ClassificationAndProperties' applies the Favorite's classifications, element categories (e.g. structural function) and property values, each still only when its own apply flag is not false; without it in the list none of them is applied. applySettings false turns 'FloorPlanAndSection' off. keepFields still applies. Default: the whole Favorite is applied as described for applySettings.",
+        min_length=1,
     )
 
 
@@ -1151,6 +1200,20 @@ class ChangeHotlinkNodesParameters(APIModel):
 class ChangeHotlinkNodesResult(APIModel):
     executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
         ..., description="A list of execution results."
+    )
+
+
+class ChangeLayoutSubsetSettingsParameters(APIModel):
+    subsets: list[LayoutSubsetSettingsChange] = Field(
+        ...,
+        description="The Layout Book subsets to change, each with the settings to change.",
+    )
+
+
+class ChangeLayoutSubsetSettingsResult(APIModel):
+    subsets: list[ChangedLayoutSubset | ErrorItem] = Field(
+        ...,
+        description="One item per input subset, in the same order: the subset that now has the settings and the layouts, and the old subset, left empty, or an error.",
     )
 
 
@@ -1444,6 +1507,14 @@ class CopyLibraryPartsResult(APIModel):
     )
 
 
+class Create3DDocumentsParameters(APIModel):
+    documentsData: list[Document3DData] = Field(..., description="One item per new 3D Document.")
+
+
+class Create3DDocumentsResult(APIModel):
+    databases: list[CreatedDatabase | ErrorItem] = Field(..., description="One item per input item, in the same order.")
+
+
 class Create3DStylesParameters(APIModel):
     styles: list[Style3DDetails] = Field(
         ...,
@@ -1537,6 +1608,21 @@ class CreateAnalyticalSupportsResult(APIModel):
     elements: list[ElementIdArrayItem | ErrorItem] = Field(..., description="A list of element identifiers or errors.")
 
 
+class CreateAngleDimensionsParameters(APIModel):
+    angleDimensionsData: list[AngleDimensionData] = Field(
+        ...,
+        description="Array of data to create Angle Dimensions (the Angle Dimension tool). They are created in the current database (the floor plan, or the section, elevation, interior elevation, worksheet or detail whose window is active), or in the one given by databaseId.",
+    )
+    databaseId: DatabaseId | None = Field(
+        None,
+        description="Optional database to create the elements in, e.g. a section, an elevation, a worksheet or a detail (see GetDatabases). The front window stays as it is: a worksheet or detail whose window was never opened is opened once on Archicad 27 and later, and the front window is brought back. Without it the elements are created in the current database. If Archicad cannot switch to it, nothing is created and the call fails.",
+    )
+
+
+class CreateAngleDimensionsResult(APIModel):
+    elements: list[ElementIdArrayItem | ErrorItem] = Field(..., description="A list of element identifiers or errors.")
+
+
 class CreateArcsParameters(APIModel):
     arcsData: list[ArcData] = Field(..., description="Array of data to create Arcs.")
     databaseId: DatabaseId | None = Field(
@@ -1597,6 +1683,47 @@ class CreateBuildingMaterialsResult(APIModel):
     attributeIds: list[AttributeIdArrayItem | ErrorItem] = Field(
         ..., description="A list of attribute identifiers or errors."
     )
+
+
+class CreateCameraSetsParameters(APIModel):
+    cameraSets: list[CameraSetData] = Field(
+        ...,
+        description="The Camera Sets (camera paths) to create, each empty: cameras are added to them later.",
+        min_length=1,
+    )
+
+
+class CreateCameraSetsResult(APIModel):
+    elements: list[ElementIdArrayItem | ErrorItem] = Field(
+        ...,
+        description="The element ids of the new Camera Sets, in the order of the input, or an error for each one that could not be created. GetCameras lists them as cameraSetElementId.",
+    )
+
+
+class CreateCamerasParameters(APIModel):
+    cameras: list[CameraData] = Field(
+        ...,
+        description="The perspective cameras to create. Each is added at the end of the path of its Camera Set, in the order of this list. The values not given come from the Camera tool defaults.",
+        min_length=1,
+    )
+
+
+class CreateCamerasResult(APIModel):
+    elements: list[ElementIdArrayItem | ErrorItem] = Field(
+        ...,
+        description="The element ids of the new cameras, in the order of the input, or an error for each one that could not be created. GetCameras lists them as cameraElementId.",
+    )
+
+
+class CreateChangeMarkersParameters(APIModel):
+    changeMarkersData: list[ChangeMarkerData] = Field(
+        ...,
+        description="The Change Markers to create, in the database of the active window (the floor plan story, a section, a detail, a worksheet or a layout).",
+    )
+
+
+class CreateChangeMarkersResult(APIModel):
+    elements: list[ElementIdArrayItem | ErrorItem] = Field(..., description="A list of element identifiers or errors.")
 
 
 class CreateCirclesParameters(APIModel):
@@ -1978,7 +2105,10 @@ class CreateGroupsResult(APIModel):
 
 
 class CreateHatchesParameters(APIModel):
-    hatchesData: list[HatchData] = Field(..., description="Array of data to create Hatches.")
+    hatchesData: list[HatchData] = Field(
+        ...,
+        description="Array of data to create Hatches. The settings left out come from the Fill tool defaults, or from the favorite given by favoriteName.",
+    )
     databaseId: DatabaseId | None = Field(
         None,
         description="Optional database to create the elements in, e.g. a worksheet, a detail or a layout (see GetDatabases, or the databaseId CreateWorksheets and CreateDetails return). The front window stays as it is: a worksheet or detail whose window was never opened is opened once on Archicad 27 and later, and the front window is brought back. Without it the elements are created in the current database. If Archicad cannot switch to it, nothing is created and the call fails.",
@@ -2165,7 +2295,7 @@ class CreateLibraryPartFromElementsParameters(APIModel):
     )
     parentId: str | None = Field(
         None,
-        description="The parent subtype of the new library part: its unique ID ('{main}-{revision}') or its main GUID, as GetAvailableLibraryParts reports it. Either parentId or parentName is required.",
+        description="The parent subtype of the new library part: its unique ID ('{main}-{revision}') or its main GUID, as GetAvailableLibraryParts reports it. Either parentId or parentName is required. The General GDL Object (the root subtype) cannot be the parent: use the Model Element or one of its subtypes.",
     )
     parentName: str | None = Field(
         None,
@@ -2416,8 +2546,23 @@ class CreatePenTablesResult(APIModel):
     )
 
 
+class CreatePicturesParameters(APIModel):
+    picturesData: list[PictureData] = Field(..., description="Array of data to create Pictures.")
+    databaseId: DatabaseId | None = Field(
+        None,
+        description="Optional database to create the pictures in, e.g. a worksheet, a detail or a layout (see GetDatabases, or the databaseId CreateWorksheets and CreateDetails return). The front window stays as it is: a worksheet or detail whose window was never opened is opened once on Archicad 27 and later, and the front window is brought back. Without it the pictures are created in the current database. If Archicad cannot switch to it, nothing is created and the call fails.",
+    )
+
+
+class CreatePicturesResult(APIModel):
+    elements: list[ElementIdArrayItem | ErrorItem] = Field(..., description="A list of element identifiers or errors.")
+
+
 class CreatePolylinesParameters(APIModel):
-    polylinesData: list[PolylineData] = Field(..., description="Array of data to create Polylines.")
+    polylinesData: list[PolylineData] = Field(
+        ...,
+        description="Array of data to create Polylines. The settings left out come from the Polyline tool defaults, or from the favorite given by favoriteName.",
+    )
     databaseId: DatabaseId | None = Field(
         None,
         description="Optional database to create the elements in, e.g. a worksheet, a detail or a layout (see GetDatabases, or the databaseId CreateWorksheets and CreateDetails return). The front window stays as it is: a worksheet or detail whose window was never opened is opened once on Archicad 27 and later, and the front window is brought back. Without it the elements are created in the current database. If Archicad cannot switch to it, nothing is created and the call fails.",
@@ -2487,6 +2632,21 @@ class CreatePropertyGroupsResult(APIModel):
     propertyGroupIds: list[PropertyGroupIdArrayItem] = Field(
         ..., description="The identifiers of the created property groups."
     )
+
+
+class CreateRadialDimensionsParameters(APIModel):
+    radialDimensionsData: list[RadialDimensionData] = Field(
+        ...,
+        description="Array of data to create Radial Dimensions (the Radial Dimension tool), each measuring the radius of an arc, a circle or a curved wall. They are created in the current database (the floor plan, or the worksheet or detail whose window is active), or in the one given by databaseId, which must hold the measured element.",
+    )
+    databaseId: DatabaseId | None = Field(
+        None,
+        description="Optional database to create the elements in, e.g. a worksheet or a detail (see GetDatabases), which must hold the measured elements. The front window stays as it is: a worksheet or detail whose window was never opened is opened once on Archicad 27 and later, and the front window is brought back. Without it the elements are created in the current database. If Archicad cannot switch to it, nothing is created and the call fails.",
+    )
+
+
+class CreateRadialDimensionsResult(APIModel):
+    elements: list[ElementIdArrayItem | ErrorItem] = Field(..., description="A list of element identifiers or errors.")
 
 
 class CreateRailingsFromPolylineParameters(APIModel):
@@ -2916,7 +3076,7 @@ class DeleteElementSetsResult(APIModel):
 class DeleteElementsParameters(APIModel):
     elements: list[ElementIdArrayItem] = Field(
         ...,
-        description="The elements to delete. The zones among them are deleted before all the others, so an automatic zone deleted together with its bounding elements is gone before its boundary is. Deleting the boundary of an automatic zone without the zone itself can open Archicad's modal 'No closed polygon found around the clicked point' dialog, which blocks the command until someone clicks it in Archicad.",
+        description="The elements to delete, of any database (the floor plan, a section, a worksheet, a layout, ...): each is deleted in the database that contains it, whichever window is the current one, and the current window stays. The zones among them are deleted before all the others, so an automatic zone deleted together with its bounding elements is gone before its boundary is. Deleting the boundary of an automatic zone without the zone itself can open Archicad's modal 'No closed polygon found around the clicked point' dialog, which blocks the command until someone clicks it in Archicad.",
     )
     dryRun: bool | None = Field(
         None,
@@ -3258,6 +3418,38 @@ class DeleteSelectedElementsResult(APIModel):
     )
 
 
+class DeleteStoryParameters(APIModel):
+    storyIndex: int = Field(..., description="The index of the story to delete (see GetStories).")
+    deleteElements: bool | None = Field(
+        None,
+        description="Archicad deletes every element whose home story is the deleted story. Without true here, a story that is the home story of any element is not deleted, and the response says how many elements it has. Default is false.",
+    )
+    dryRun: bool | None = Field(
+        None,
+        description='If true, the command makes all the checks of a real run and resolves the same targets, with the same errors, but changes nothing in the project and creates no undo step. The response is that of a real run with "dryRun": true added, and says for each target what the real run would do. Default is false.',
+    )
+
+
+class DeleteStoryResult(APIModel):
+    success: bool = Field(
+        ...,
+        description="Whether the story was deleted, or on a dry run, whether a real run would delete it.",
+    )
+    error: Error | None = None
+    wouldDelete: Literal[True] | None = Field(
+        None,
+        description="Present, and true, on a dry run that a real run would delete the story.",
+    )
+    elementCount: int | None = Field(
+        None,
+        description="The number of elements whose home story is the story (in the floor plan database): the elements deleted with it, or that kept it from being deleted. Absent when the story was not found.",
+    )
+    dryRun: Literal[True] | None = Field(
+        None,
+        description="Present, and true, only in the response of a dry run (the dryRun input was true): nothing was changed in the project.",
+    )
+
+
 class DeleteUserDataOfAttributesParameters(APIModel):
     attributeIds: list[AttributeIdArrayItem] = Field(..., description="A list of attributes.")
     dryRun: bool | None = Field(
@@ -3532,10 +3724,21 @@ class Get3DBoundingBoxesResult(APIModel):
 
 class Get3DCutPlanesResult(APIModel):
     isCutPlanes: bool = Field(..., description="Whether the 3D cut planes are switched on.")
-    useCustom: bool = Field(..., description="Whether the custom cut settings are used.")
+    useCustom: bool = Field(
+        ...,
+        description="Whether the cut faces of the elements take customPen and customSurfaceId.",
+    )
+    customPen: int | None = Field(
+        None,
+        description="The pen of the cut edges when useCustom is true. Missing when it is no valid pen (0).",
+    )
+    customSurfaceId: AttributeId | None = Field(
+        None,
+        description="The surface of the cut faces when useCustom is true. Missing when it is no surface attribute.",
+    )
     cutPlanes: list[CutPlane] = Field(
         ...,
-        description="The cut planes, in the form accepted by Set3DCutPlanes: pa*x + pb*y + pc*z + pd = 0, pd in meters.",
+        description="The cut planes, in the form accepted by Set3DCutPlanes: pa*x + pb*y + pc*z = pd, pd in meters.",
     )
 
 
@@ -3749,17 +3952,31 @@ class GetAnalyticalLoadCasesResult(APIModel):
     )
 
 
+class GetAnalyticalLoadCombinationsParameters(APIModel):
+    loadCombinationIds: list[AnalyticalLoadCombinationIdArrayItem] | None = Field(
+        None,
+        description="The load combinations to read, answered in this order, an error object for one that does not exist. Every load combination of the project is listed when it is omitted.",
+    )
+
+
 class GetAnalyticalLoadCombinationsResult(APIModel):
     loadCombinations: list[AnalyticalLoadCombination | ErrorItem] = Field(
         ...,
-        description="The load combinations of the project. A load combination that cannot be read is represented by an error object.",
+        description="The load combinations of the project, or the ones given in loadCombinationIds. A load combination that cannot be read is represented by an error object.",
+    )
+
+
+class GetAnalyticalLoadGroupsParameters(APIModel):
+    loadGroupIds: list[AnalyticalLoadGroupIdArrayItem] | None = Field(
+        None,
+        description="The load groups to read, answered in this order, an error object for one that does not exist. Every load group of the project is listed when it is omitted.",
     )
 
 
 class GetAnalyticalLoadGroupsResult(APIModel):
     loadGroups: list[AnalyticalLoadGroup | ErrorItem] = Field(
         ...,
-        description="The load groups of the project. A load group that cannot be read is represented by an error object.",
+        description="The load groups of the project, or the ones given in loadGroupIds. A load group that cannot be read is represented by an error object.",
     )
 
 
@@ -3829,7 +4046,7 @@ class GetAnalyticalMemberTypesOfElementsParameters(APIModel):
 class GetAnalyticalMemberTypesOfElementsResult(APIModel):
     memberTypesOfElements: list[AnalyticalMemberTypeResult | ErrorItem] = Field(
         ...,
-        description="The analytical member type of each element, in the order of the input. An element the type cannot be got for is represented by an error object.",
+        description="The analytical member type of each element, in the order of the input, as the Complementary Project (the structural analysis project exchanged with Archicad) gives it: Unknown for every element when the project has none. An element that does not exist, or whose type cannot be got, is represented by an error object.",
     )
 
 
@@ -4086,7 +4303,7 @@ class GetAutoTextNameResult(APIModel):
 class GetAvailableLibraryPartsParameters(APIModel):
     filterByTypeId: LibraryPartType | None = Field(
         None,
-        description="Optional. Filter by libpart type (matches the value returned by LibPartTypeIdToString).",
+        description="Optional. Only list the library parts of this type, the typeId of the response. 'Pict' and 'Picture' both list the pictures.",
     )
 
 
@@ -4523,6 +4740,17 @@ class GetDatabasesResult(APIModel):
     databases: list[DatabaseDetails]
 
 
+class GetDefaultDesignOptionResult(APIModel):
+    isMainModel: bool = Field(
+        ...,
+        description="True when new elements go to the Main Model, false when they go to designOption.",
+    )
+    designOption: DesignOptionDetails | None = Field(
+        None,
+        description="The default design option, which new elements go to. Only present when isMainModel is false.",
+    )
+
+
 class GetDescriptorsOfElementsParameters(APIModel):
     elements: list[ElementIdArrayItem] = Field(..., description="A list of elements.")
 
@@ -4749,7 +4977,7 @@ class GetElementAtCoordinateParameters(APIModel):
     )
     z: float | None = Field(
         None,
-        description="Optional. The elevation of the search point, handed to Archicad together with the coordinate. Default is 0; without z a point 1 mm higher is also tried, so an element whose top is at 0 (for example a slab at the story level) is found.",
+        description="Optional. The elevation of the search point, handed to Archicad together with the coordinate. Archicad finds the highest element whose top is below z. Default is 0; without z a point 1 mm higher is also tried, so an element whose top is at 0 (for example a slab at the story level) is found, and then the topmost element on the active story, so an element whose top is above the story level is found too, like a click on the floor plan.",
     )
     filters: list[ElementFilter] | None = Field(
         None,
@@ -4817,6 +5045,35 @@ class GetElementConnectionsResult(APIModel):
     executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
         ...,
         description="Aligned with the input array of elements: whether the element was found and taken into the search.",
+    )
+
+
+class GetElementFieldDefinitionsParameters(APIModel):
+    elementType: ElementType = Field(..., description="The element type whose fields are listed.")
+
+
+class GetElementFieldDefinitionsResult(APIModel):
+    structName: str = Field(
+        ...,
+        description="The C++ struct of the element type in the Archicad API, e.g. API_AngleDimensionType.",
+    )
+    fields: list[ElementFieldDefinition] = Field(
+        ...,
+        description="Every field GetElementFields reads and SetElementFields writes for this element type.",
+    )
+
+
+class GetElementFieldsParameters(APIModel):
+    elements: list[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    fields: list[str] | None = Field(
+        None,
+        description='The paths of the fields to read (see GetElementFieldDefinitions), e.g. ["note.noteFont", "note.frame"]. Every field of the element is read when it is left out. A path the element type does not have is listed in the element\'s missingFields.',
+    )
+
+
+class GetElementFieldsResult(APIModel):
+    elementFields: list[ElementFieldValues | ErrorItem] = Field(
+        ..., description="The fields of each element, aligned with the input."
     )
 
 
@@ -4981,11 +5238,19 @@ class GetElementsByCriteriaParameters(APIModel):
         description="Maximum number of matching elements to list. The count is still the total number of matches.",
         ge=1,
     )
+    databases: list[DatabaseIdArrayItem] | None = Field(
+        None,
+        description="Optional. The databases to search, as GetDatabases lists them; an element found in more than one is counted once. If omitted, the current database is searched: the floor plan, or in a section or elevation window the model elements it shows.",
+    )
 
 
 class GetElementsByCriteriaResult(APIModel):
     count: int = Field(..., description="Total number of matching elements.")
     elements: list[ElementIdArrayItem] | None = Field(None, description="List of matching elements.")
+    executionResultForDatabases: list[SuccessfulExecutionResult | FailedExecutionResult] | None = Field(
+        None,
+        description="Only when databases is given: whether each database could be searched, in the order of databases.",
+    )
 
 
 class GetElementsByIFCIdsParameters(APIModel):
@@ -5133,6 +5398,21 @@ class GetFavoritesByTypeParameters(APIModel):
 GetFavoritesByTypeResult: TypeAlias = FavoritesWrapper | ErrorItem
 
 
+class GetFieldsOfElementDefaultsParameters(APIModel):
+    elementTypes: list[ElementType] = Field(..., description="The element types whose tool defaults are read.")
+    fields: list[str] | None = Field(
+        None,
+        description='The paths of the fields to read (see GetElementFieldDefinitions), e.g. ["thickness", "height"]. Every field of the defaults is read when it is left out. A path the element type does not have is listed in missingFields.',
+    )
+
+
+class GetFieldsOfElementDefaultsResult(APIModel):
+    fieldsOfElementDefaults: list[ElementFieldValues | ErrorItem] = Field(
+        ...,
+        description="The fields of the tool defaults of each element type, in the input order, or an error when the type has no fields in the table or no tool defaults.",
+    )
+
+
 class GetFillsParameters(APIModel):
     attributeIds: list[AttributeIdArrayItem] = Field(..., description="A list of attributes.")
     fields: list[FillAttributeField] | None = Field(
@@ -5166,6 +5446,14 @@ class GetGDLDateResult(APIModel):
 
 class GetGDLParametersOfElementsParameters(APIModel):
     elements: list[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    parameterNames: list[str] | None = Field(
+        None,
+        description="Optional. Only the parameters with these GDL variable names are returned (case-insensitive), in the order of the library part. A name the element's library part does not have is left out. All parameters are returned when it is not given.",
+    )
+    includePossibleValues: bool | None = Field(
+        None,
+        description="Optional, true by default. When false, possibleValues (the value lists of the Parameter Script, e.g. every installed font for a font parameter) is left out of the answer, which makes it much smaller.",
+    )
 
 
 class GetGDLParametersOfElementsResult(APIModel):
@@ -5761,6 +6049,10 @@ class GetLibraryPartFileInfoParameters(APIModel):
         None,
         description="The password of password protected library parts. Reading a script of a protected part without the right password is an error for that file.",
     )
+    includeParameters: bool | None = Field(
+        None,
+        description="Also returns the parameters of each file with their default values and descriptions, in the format of GetLibraryPartParameterValues. Default is false, so a caller that only wants the scripts gets them even when the parameters of a file cannot be read.",
+    )
 
 
 class GetLibraryPartFileInfoResult(APIModel):
@@ -6215,7 +6507,7 @@ class GetMarkerParametersOfElementsParameters(APIModel):
 class GetMarkerParametersOfElementsResult(APIModel):
     markerParametersOfElements: list[MarkerParametersOfElement | ErrorItem] = Field(
         ...,
-        description="The marker of each given element, in the order of the input, or an error for an element that is not a window or a door.",
+        description="The marker of each given element, in the order of the input, or an error for an element that is not a window, a door or a change marker, or has no marker (a change marker with only a cloud).",
     )
 
 
@@ -6582,11 +6874,19 @@ class GetProductVersionInfoResult(APIModel):
     )
 
 
+class GetProfileValuesOfElementsParameters(APIModel):
+    elements: list[ElementIdArrayItem]
+
+
+class GetProfileValuesOfElementsResult(APIModel):
+    profileValuesOfElements: list[ElementProfileValues | ErrorItem]
+
+
 class GetProfilesParameters(APIModel):
     attributeIds: list[AttributeIdArrayItem] = Field(..., description="A list of attributes.")
     fields: list[ProfileAttributeField] | None = Field(
         None,
-        description="Names of the fields to return for each Profile. If omitted, every field is returned. Note the raw cross-section vector geometry itself is not exposed; width/height/minimumWidth/minimumHeight/widthStretchable/heightStretchable/hasCoreSkin/profileModifiers are derived measurements matching what the Profile Editor shows, computed from the profile's internal stretch/parameter data.",
+        description="Names of the fields to return for each Profile. If omitted, every field is returned. Note the raw cross-section vector geometry itself is not exposed; width/height/minimumWidth/minimumHeight/widthStretchable/heightStretchable/stretchZones/hasCoreSkin/profileModifiers are derived measurements matching what the Profile Editor shows, computed from the profile's internal stretch/parameter data.",
     )
 
 
@@ -6864,12 +7164,12 @@ class GetQuantitiesOfElementsParameters(APIModel):
     elements: list[ElementIdArrayItem] = Field(..., description="A list of elements.")
     minOpeningSize: float | None = Field(
         None,
-        description="Optional minimum opening size in square meters. Openings smaller than this are not subtracted when the conditional values (for example volumeConditional of a Wall) are calculated. Archicad only uses it for walls. Default value is 0, so every opening is subtracted.",
+        description="Optional minimum opening size in square meters. Openings smaller than this are not subtracted from the conditional surfaces of a Wall (referenceSideSurfaceConditional and oppositeSideSurfaceConditional). Archicad only uses it for walls; the conditional volume follows the project's calculation rules instead. Default value is 0, so every opening is subtracted.",
         ge=0.0,
     )
     calculateInOneCall: bool | None = Field(
         None,
-        description="Optional. When true, Archicad calculates the quantities of all the supported elements in one call instead of one call per element, which can be faster for many elements. The output has the same format. If that one call fails, every supported element gets the same error. Default value is false.",
+        description="Optional. When true, Archicad calculates the quantities of all the supported elements of one type in one call (one call per element type, because Archicad only calculates elements of the same type together) instead of one call per element, which can be faster for many elements. The output has the same format. If the call of a type fails, every element of that type gets the same error. Default value is false.",
     )
 
 
@@ -6877,6 +7177,17 @@ class GetQuantitiesOfElementsResult(APIModel):
     quantitiesOfElements: list[ElementQuantityDetails | ErrorItem] = Field(
         ...,
         description="The quantities of the elements, in the order of the given elements. Lengths are in meters, areas in square meters and volumes in cubic meters.",
+    )
+
+
+class GetRailingSegmentPatternsParameters(APIModel):
+    elements: list[ElementIdArrayItem] = Field(..., description="The railings to read.")
+
+
+class GetRailingSegmentPatternsResult(APIModel):
+    railings: list[RailingSegmentPatternsResult | ErrorItem] = Field(
+        ...,
+        description="One item per given element, in the order of the input. An element that is not a railing, or whose segments cannot be read, is represented by an error object.",
     )
 
 
@@ -7346,6 +7657,18 @@ class GetToolboxItemsResult(APIModel):
     )
 
 
+class GetTypedPropertyValuesOfElementsParameters(APIModel):
+    elements: list[ElementIdArrayItem] = Field(..., description="A list of elements.")
+    properties: list[PropertyIdArrayItem] = Field(..., description="A list of property identifiers.")
+
+
+class GetTypedPropertyValuesOfElementsResult(APIModel):
+    propertyValuesForElements: list[TypedPropertyValuesForElement | ErrorItem] = Field(
+        ...,
+        description="One item per given element, in their order: the values of the element's properties, or an error for an element that was not found.",
+    )
+
+
 class GetURLReferencesOfElementsParameters(APIModel):
     elements: list[ElementIdArrayItem] = Field(..., description="A list of elements.")
 
@@ -7736,6 +8059,28 @@ class ImportPropertiesXmlResult(APIModel):
     removed: list[GuidId]
 
 
+class InsertStoryParameters(APIModel):
+    storyIndex: int = Field(
+        ...,
+        description="The index of an existing story (see GetStories) next to which the new story is inserted.",
+    )
+    position: StoryInsertionPosition
+    name: str | None = Field(None, description="The name of the new story. Default is an empty name.")
+    height: float | None = Field(
+        None,
+        description="The height of the new story, greater than zero. Default is the height of the story of storyIndex.",
+        gt=0.0,
+    )
+    dispOnSections: bool | None = Field(
+        None,
+        description="Whether the level line of the new story appears on sections and elevations. Default is what Archicad gives a new story.",
+    )
+
+
+class InsertStoryResult(APIModel):
+    story: StoryParameters = Field(..., description="The new story, as GetStories reports it after the insertion.")
+
+
 class InterpretAutoTextsParameters(APIModel):
     autoTexts: list[AutoTextExpression] = Field(
         ...,
@@ -7875,6 +8220,36 @@ class MergeElementsParameters(APIModel):
 MergeElementsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class MergeFileParameters(APIModel):
+    sourceLocation: str = Field(
+        ...,
+        description="Absolute path of the file to merge: an Archicad project (.pln, .pla) or module (.mod). It cannot be a file the project already hotlinks: breaking that hotlink would turn its placed instances into ordinary elements too.",
+    )
+    origin: HotlinkOrigin | None = Field(
+        None,
+        description="Optional. Where the origin of the file lands in the project. Defaults to the project origin; if z is omitted, it is 0.",
+    )
+    rotationAngle: float | None = Field(
+        None,
+        description="Optional rotation about the origin, counter-clockwise, in radians. Defaults to 0.",
+    )
+    mirrored: bool | None = Field(
+        None,
+        description="Optional. Reflects the file's local X axis before the rotation. Defaults to false.",
+    )
+    floorIndex: int | None = Field(
+        None,
+        description="Optional story of the project that the story with index 0 of the file goes to; the other stories of the file follow it. Defaults to 0, so each story of the file goes to the story with the same index.",
+    )
+
+
+class MergeFileResult(APIModel):
+    elements: list[ElementIdArrayItem] = Field(
+        ...,
+        description="The elements the merge added to the model, every element of the file's model. Archicad leaves them grouped together, as it leaves the elements of a broken hotlink; UngroupElements dissolves the group.",
+    )
+
+
 class MirrorElementsParameters(APIModel):
     elementsWithMirrorAxes: list[ElementMirrorData] = Field(..., description="The elements with mirror axes.")
 
@@ -7899,6 +8274,19 @@ class ModelToScreenResult(APIModel):
     )
 
 
+class ModifyAngleDimensionsParameters(APIModel):
+    angleDimensionsWithDetails: list[AngleDimensionWithDetails] = Field(
+        ...,
+        description="The Angle Dimensions to change, each with the settings to change. Only the given settings are changed; the keys are those CreateAngleDimensions takes and GetDetailsOfElements returns. The lines and the arc position cannot be changed: Archicad keeps them as they are, so delete the dimension and create it again with CreateAngleDimensions.",
+    )
+
+
+class ModifyAngleDimensionsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
 class ModifyAssociativeDimensionsParameters(APIModel):
     dimensionsWithDetails: list[AssociativeDimensionWithDetails] = Field(
         ...,
@@ -7917,6 +8305,47 @@ class ModifyBeamsParameters(APIModel):
 
 
 class ModifyBeamsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
+class ModifyCameraSetsParameters(APIModel):
+    cameraSets: list[CameraSetModificationData] = Field(
+        ...,
+        description="The Camera Sets to change, each with the values to change; the values not given are kept.",
+        min_length=1,
+    )
+
+
+class ModifyCameraSetsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="One result for each Camera Set of the input, in its order."
+    )
+
+
+class ModifyCamerasParameters(APIModel):
+    cameras: list[CameraModificationData] = Field(
+        ...,
+        description="The perspective cameras to change, each with the values to change; the values not given are kept. A camera keeps its element id, its Camera Set and its place in the path.",
+        min_length=1,
+    )
+
+
+class ModifyCamerasResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="One result for each camera of the input, in its order."
+    )
+
+
+class ModifyChangeMarkersParameters(APIModel):
+    changeMarkersWithDetails: list[ChangeMarkerWithDetails] = Field(
+        ...,
+        description="The Change Markers to change, in the database of the active window, each with the settings to change. Only the given settings are changed; the keys are those CreateChangeMarkers takes and GetDetailsOfElements returns. The cloud polygon cannot be changed: besides the settings, ACAPI_Element_Change only changes the position of a marker without a polygon, so delete the marker and create it again with CreateChangeMarkers for a new polygon.",
+    )
+
+
+class ModifyChangeMarkersResult(APIModel):
     executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
         ..., description="A list of execution results."
     )
@@ -7945,10 +8374,23 @@ class ModifyCurtainWallFramesResult(APIModel):
     )
 
 
+class ModifyCurtainWallPanelsParameters(APIModel):
+    panelsWithDetails: list[CurtainWallPanelWithDetails] = Field(
+        ...,
+        description="Curtain Wall Panels to modify (the GUIDs from GetSubelementsOfHierarchicalElements), with the fields to change. Only the given fields are changed.",
+    )
+
+
+class ModifyCurtainWallPanelsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
 class ModifyCurtainWallsParameters(APIModel):
     curtainWallsWithDetails: list[CurtainWallWithDetails] = Field(
         ...,
-        description="Array of Curtain Wall elements to modify, with the fields to change. Only the given fields are changed; the others, and the frames and panels not affected by them, are left as they are. The fields are those of CreateCurtainWalls, so a curtain wall can be changed in place instead of being deleted and recreated, keeping its GUID, properties and classifications.",
+        description="Array of Curtain Wall elements to modify, with the fields to change. Only the given fields are changed; the others, and the frames and panels not affected by them, are left as they are. The fields are those of CreateCurtainWalls, plus flipped, offset and nominalWidth, so a curtain wall can be changed in place instead of being deleted and recreated, keeping its GUID, properties and classifications, and the floor plan display fields GetDetailsOfElements returns for a curtain wall, under the same names. Every given field is read back, and one Archicad did not apply fails the item.",
     )
 
 
@@ -8062,6 +8504,23 @@ class ModifyGraphicOverrideRulesResult(APIModel):
     )
 
 
+class ModifyHatchesParameters(APIModel):
+    hatchesWithDetails: list[HatchWithDetails] = Field(
+        ...,
+        description="The Hatches (Fills) to change, each with the settings to change. Only the given settings are changed; the keys are those CreateHatches takes and GetDetailsOfElements returns. coordinates replaces the whole polygon, with its arcs and holes.",
+    )
+    databaseId: DatabaseId | None = Field(
+        None,
+        description="Optional database the hatches are in, e.g. a worksheet, a detail or a layout (see GetDatabases, or the databaseId CreateWorksheets and CreateDetails return), as CreateHatches takes it. The front window stays as it is: a worksheet or detail whose window was never opened is opened once on Archicad 27 and later, and the front window is brought back. Without it the hatches are looked for in the current database. If Archicad cannot switch to it, nothing is changed and the call fails.",
+    )
+
+
+class ModifyHatchesResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
 class ModifyKeynoteFoldersParameters(APIModel):
     foldersData: list[KeynoteFolderModificationData] = Field(
         ...,
@@ -8091,7 +8550,7 @@ class ModifyKeynoteItemsResult(APIModel):
 class ModifyLabelsParameters(APIModel):
     labelsWithDetails: list[LabelsWithDetail] = Field(
         ...,
-        description="Array of Label elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is. The label's class (Text/Symbol) cannot be changed after creation. A change of the text, the runs, or a run-level style field (pen, font, faces, height, effects) rebuilds the content as one paragraph, which makes the label's text auto-width (word wrap off), as SetDetailsOfElements does, and on a multi-run label applies that style to every run; the other style fields leave the content as it is.",
+        description="Array of Label elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is. The label's class (Text/Symbol) cannot be changed after creation. A change of the text, the runs, or a run-level style field (pen, font, faces, height, effects) rebuilds the content (one paragraph per line), which makes the label's text auto-width (word wrap off), as SetDetailsOfElements does, and on a multi-run label applies that style to every run; the other style fields leave the content as it is.",
     )
 
 
@@ -8111,6 +8570,19 @@ class ModifyLampsParameters(APIModel):
 class ModifyLampsResult(APIModel):
     executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
         ..., description="A list of execution results."
+    )
+
+
+class ModifyLayersParameters(APIModel):
+    layers: list[LayerModificationData] = Field(
+        ...,
+        description="The layers to change. Only the given fields of a layer are changed; every other setting of it is kept.",
+    )
+
+
+class ModifyLayersResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="One result per layer, in the input order."
     )
 
 
@@ -8315,6 +8787,41 @@ class ModifyPensResult(APIModel):
     )
 
 
+class ModifyPicturesParameters(APIModel):
+    picturesWithDetails: list[PictureWithDetails] = Field(
+        ...,
+        description="Array of Picture elements to modify, with the settings to change. Only the given settings are changed; the others are left as they are. The image itself is not changed. Archicad cannot change a picture in place, so a picture with a change is replaced by a new picture with the same image, layer, story and ID, and the original is deleted: the new picture has a new elementId (returned in elements), and labels, dimensions, properties and classifications of the original are not carried over.",
+    )
+    databaseId: DatabaseId | None = Field(
+        None,
+        description="Optional database the pictures are in, e.g. a worksheet, a detail or a layout (see GetDatabases). The front window stays as it is: a worksheet or detail whose window was never opened is opened once on Archicad 27 and later, and the front window is brought back. Without it the pictures are looked for in the current database. If Archicad cannot switch to it, nothing is changed and the call fails.",
+    )
+
+
+class ModifyPicturesResult(APIModel):
+    elements: list[ElementIdArrayItem | ErrorItem] = Field(
+        ...,
+        description="One result per item of picturesWithDetails, in the same order. On success elementId is the picture's identifier after the change: a new one when a setting was changed (the picture is replaced), the given one when nothing was to change.",
+    )
+
+
+class ModifyPolylinesParameters(APIModel):
+    polylinesWithDetails: list[PolylineWithDetails] = Field(
+        ...,
+        description="The Polylines to change, each with the settings to change. Only the given settings are changed; the keys are those CreatePolylines takes and GetDetailsOfElements returns. coordinates replaces the whole polygon, with its arcs. The pen weight override (penWeightMm of CreatePolylines) is not taken: Archicad did not keep a pen weight changed on an existing polyline.",
+    )
+    databaseId: DatabaseId | None = Field(
+        None,
+        description="Optional database the polylines are in, e.g. a worksheet, a detail or a layout (see GetDatabases, or the databaseId CreateWorksheets and CreateDetails return), as CreatePolylines takes it. The front window stays as it is: a worksheet or detail whose window was never opened is opened once on Archicad 27 and later, and the front window is brought back. Without it the polylines are looked for in the current database. If Archicad cannot switch to it, nothing is changed and the call fails.",
+    )
+
+
+class ModifyPolylinesResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
 class ModifyPropertyValueOfElementsParameters(APIModel):
     elements: list[ElementIdArrayItem] = Field(
         ...,
@@ -8416,10 +8923,35 @@ class ModifyStairsResult(APIModel):
     )
 
 
+class ModifyStoryParameters(APIModel):
+    storyIndex: int = Field(..., description="The index of the story to modify (see GetStories).")
+    name: str | None = Field(None, description="The new name of the story.")
+    level: float | None = Field(
+        None,
+        description="The new level of the story. Only this story moves: the story below gets taller or shorter, and the stories above stay where they are unless height is given too. It must stay above the level of the story below, and, without height, below the level of the story above. On the top story without height its top stays where it is: moving it up makes it shorter by as much, and moving it down taller.",
+    )
+    height: float | None = Field(
+        None,
+        description="The new height of the story, greater than zero. As in Archicad's Story Settings dialog, every story above moves up or down with the top of this story and keeps its height.",
+        gt=0.0,
+    )
+    dispOnSections: bool | None = Field(
+        None,
+        description="Whether the level line of the story appears on sections and elevations.",
+    )
+
+
+class ModifyStoryResult(APIModel):
+    story: StoryParameters = Field(
+        ...,
+        description="The modified story, as GetStories reports it after the change.",
+    )
+
+
 class ModifyTextsParameters(APIModel):
     textsWithDetails: list[TextsWithDetail] = Field(
         ...,
-        description="Array of Text elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is. A change of the text, the runs, or a run-level style field (pen, font, faces, height, effects) rebuilds the content as one paragraph, as SetDetailsOfElements does, and on a multi-run text applies that style to every run; a text that wraps keeps its wrap width through the rebuild unless the same item gives a width. The other style fields and a width leave the content as it is.",
+        description="Array of Text elements to modify, with the fields to change. Only provided fields are changed; omitted fields are left as-is. A change of the text, the runs, or a run-level style field (pen, font, faces, height, effects) rebuilds the content (one paragraph per line, as SetDetailsOfElements does), and on a multi-run text applies that style to every run; a text that wraps keeps its wrap width through the rebuild unless the same item gives a width. The other style fields and a width leave the content as it is.",
     )
 
 
@@ -8452,7 +8984,7 @@ class ModifyWindowsResult(APIModel):
 class ModifyZonesParameters(APIModel):
     zonesWithDetails: list[ZoneWithDetails] = Field(
         ...,
-        description="Array of Zone elements to modify, with the fields to change. Only the given fields are changed; the polygon and the omitted fields are kept. The same fields as the ZoneSettings of SetDetailsOfElements.",
+        description="Array of Zone elements to modify, with the fields to change. Only the given fields are changed and the omitted fields are kept; the polygon is kept unless geometry is given. The same fields as the ZoneSettings of SetDetailsOfElements, plus geometry and allowOverlap.",
     )
 
 
@@ -8651,7 +9183,7 @@ class OpenSettingsDialogResult(APIModel):
 class PhotoRenderParameters(APIModel):
     imageFilePath: str = Field(
         ...,
-        description="Absolute path of the image file to write. An existing file is overwritten, unless overwrite is false.",
+        description="Absolute path of the image file to write. Its folder must exist: a missing folder is refused before anything is rendered. An existing file is overwritten, unless overwrite is false.",
     )
     overwrite: bool | None = Field(
         None,
@@ -8866,7 +9398,18 @@ class PublishPublisherSetParameters(APIModel):
     )
     selectedNavigatorItemIds: list[NavigatorItemIdArrayItem] | None = Field(
         None,
-        description="Optional publisher-tree navigator items to publish instead of the whole publisher set.",
+        description='Optional publisher-tree navigator items to publish instead of the whole publisher set. Each item wraps its id in navigatorItemId, as the items of GetNavigatorItemTree do: [{"navigatorItemId": {"guid": "6E1C3A9B-0F2D-4B8E-9C7A-1D2E3F405162"}}], not [{"guid": "..."}].',
+    )
+
+
+class PublishPublisherSetResult(APIModel):
+    outputFolder: str | None = Field(
+        None,
+        description="The local or LAN folder the set was published to: outputPath, else the path saved in the publisher set. Absent when the set publishes elsewhere (to the Internet or a BIMcloud/Teamwork file server).",
+    )
+    writtenFiles: list[str] | None = Field(
+        None,
+        description="Full paths of the files in outputFolder and its subfolders that were created or changed while the command ran, as found when Archicad reported the publishing finished. Absent when outputFolder is absent or holds more than 20000 files and folders.",
     )
 
 
@@ -8887,6 +9430,19 @@ class ReadFavoritesFileResult(APIModel):
 RebuildCurrentDatabaseResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class RebuildMEPRoutingElementsParameters(APIModel):
+    routingElements: list[MEPRoutingElementRebuildData] = Field(
+        ...,
+        description="The routing elements to rebuild. Each is deleted and placed again. Every segment, node and fitting gets a new guid (see guidMap); labels, dimensions and other things attached to them are not carried over. Use ModifyMEPRoutingElements nodePositions instead when the node count stays the same: it keeps every guid.",
+    )
+
+
+class RebuildMEPRoutingElementsResult(APIModel):
+    elements: list[RebuiltMEPRoutingElement | ErrorItem] = Field(
+        ..., description="One item for each given routing element, in order."
+    )
+
+
 class RebuildViewParameters(APIModel):
     regenerate: bool | None = Field(
         None,
@@ -8895,6 +9451,102 @@ class RebuildViewParameters(APIModel):
 
 
 RebuildViewResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+
+
+class RecreateAngleDimensionsParameters(APIModel):
+    angleDimensions: list[AngleDimensionRecreationData] = Field(
+        ...,
+        description="The angle dimensions to recreate on new lines, with a new arc position.",
+    )
+
+
+class RecreateAngleDimensionsResult(APIModel):
+    results: list[RecreatedElement | ErrorItem] = Field(
+        ...,
+        description="One item per input angle dimension: the new angle dimension, or an error. After an error nothing was changed for that angle dimension. The old one leaves its group.",
+    )
+
+
+class RecreateCurtainWallsParameters(APIModel):
+    curtainWalls: list[CurtainWallRecreationData] = Field(
+        ...,
+        description="The curtain walls to recreate on a new reference line, with a new height or with a new slant. Give at least one of coordinates, height and angle.",
+    )
+
+
+class RecreateCurtainWallsResult(APIModel):
+    results: list[RecreatedElement | ErrorItem] = Field(
+        ...,
+        description="One item per input curtain wall: the new curtain wall, or an error. After an error nothing was changed for that curtain wall. Its labels are deleted with it, dimensions measuring it lose those witness points or are deleted, and it leaves its group.",
+    )
+
+
+class RecreateDoorsParameters(APIModel):
+    doors: list[DoorRecreationData] = Field(..., description="The doors to recreate in another wall.")
+
+
+class RecreateDoorsResult(APIModel):
+    results: list[RecreatedElement | ErrorItem] = Field(
+        ...,
+        description="One item per input door: the new door, or an error. After an error nothing was changed for that door. Labels of the old door are deleted with it, dimensions measuring it lose those witness points or are deleted, and it leaves its group.",
+    )
+
+
+class RecreateRailingsParameters(APIModel):
+    railings: list[RailingRecreationData] = Field(..., description="The railings to recreate on a new reference line.")
+
+
+class RecreateRailingsResult(APIModel):
+    results: list[RecreatedElement | ErrorItem] = Field(
+        ...,
+        description="One item per input railing: the new railing, or an error. After an error nothing was changed for that railing. Its labels are deleted with it, dimensions measuring it lose those witness points or are deleted, and it leaves its group. The link of a railing to the slab or stair it was placed on cannot be read through the Archicad API, so it is not listed in notCarriedOver: the new railing has none.",
+    )
+
+
+class RecreateSkylightsParameters(APIModel):
+    skylights: list[SkylightRecreationData] = Field(
+        ..., description="The skylights to recreate on another roof or shell."
+    )
+
+
+class RecreateSkylightsResult(APIModel):
+    results: list[RecreatedElement | ErrorItem] = Field(
+        ...,
+        description="One item per input skylight: the new skylight, or an error. After an error nothing was changed for that skylight. Labels of the old skylight are deleted with it, dimensions measuring it lose those witness points or are deleted, and it leaves its group.",
+    )
+
+
+class RecreateStairsParameters(APIModel):
+    stairs: list[StairRecreationData] = Field(..., description="The stairs to recreate on a new baseline.")
+
+
+class RecreateStairsResult(APIModel):
+    results: list[RecreatedElement | ErrorItem] = Field(
+        ...,
+        description="One item per input stair: the new stair, or an error. After an error nothing was changed for that stair. Labels of the old stair are deleted with it; dimensions measuring it lose those witness points or are deleted.",
+    )
+
+
+class RecreateWindowsParameters(APIModel):
+    windows: list[WindowRecreationData] = Field(..., description="The windows to recreate in another wall.")
+
+
+class RecreateWindowsResult(APIModel):
+    results: list[RecreatedElement | ErrorItem] = Field(
+        ...,
+        description="One item per input window: the new window, or an error. After an error nothing was changed for that window. Labels of the old window are deleted with it, dimensions measuring it lose those witness points or are deleted, and it leaves its group.",
+    )
+
+
+class RecreateZonesParameters(APIModel):
+    zones: list[ZoneRecreationData] = Field(..., description="The zones to recreate as manual zones.")
+
+
+class RecreateZonesResult(APIModel):
+    results: list[RecreatedElement | ErrorItem] = Field(
+        ...,
+        description="One item per input zone: the new manual zone, or an error. After an error nothing was changed for that zone. Labels of the old zone are deleted with it, dimensions measuring it lose those witness points or are deleted, and it leaves its group.",
+    )
 
 
 RedrawCurrentDatabaseResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
@@ -9039,8 +9691,23 @@ class RemoveElementNotificationClientParameters(APIModel):
 RemoveElementNotificationClientResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class RemoveElementTrimDirectionParameters(APIModel):
+    elementPairs: list[ElementTrimPair] = Field(
+        ...,
+        description="Per pair, the trim of elementId by trimmingElementId is removed. When trimmingElementId is trimmed by elementId too (two roofs or shells trimming each other), that other direction is kept, with its trim type. The pairs are done in order, each on the trims the pairs before it left, so the two pairs of two roofs remove both directions.",
+        min_length=1,
+    )
+
+
+class RemoveElementTrimDirectionResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ...,
+        description="One result for each input pair, in the order of the input. A pair whose element is not trimmed by its trimming element fails and changes nothing. When Archicad fails to remove a trim or to trim the kept direction again, the whole call is undone and every pair fails, the pair that failed with the reason.",
+    )
+
+
 class RemoveElementTrimsParameters(APIModel):
-    elementPairs: list[ElementPair] = Field(
+    elementPairs: list[ElementTrimPair] = Field(
         ...,
         description="The trimmed element and the roof or shell trimming it, per pair. The trimming connection between the two is removed: when they trim each other, both directions are removed.",
     )
@@ -9707,9 +10374,23 @@ class SearchPropertiesResult(APIModel):
 
 
 class Set3DCutPlanesParameters(APIModel):
-    cutPlanes: list[CutPlane] | None = Field(
+    cutPlanes: list[CutPlane] = Field(
+        ...,
+        description="The cut planes, replacing the current ones. Each cuts away the side of its plane that its normal vector (pa, pb, pc) points to; several planes cut away the union of those sides. Setting planes also turns 3D Cutaway on (off and on again when it is on), which puts them in force in the 3D window. An empty array switches the 3D cut off. A plane without cutPen or cutSurfaceId keeps those of the current plane in its place, or of the last current plane; where there is none, or it is pen 0 or no surface (which draws black), it takes customPen and customSurfaceId.",
+    )
+    useCustom: bool | None = Field(
         None,
-        description="The cut planes. An empty array switches the 3D cut off. The side of a plane its normal vector points to is cut away and the other side is kept (to be confirmed in Archicad). pd is in meters.",
+        description="The Custom setting of the cut faces, kept for the 3D Cutting Planes settings; in the Archicad 29 3D window the cut faces take each plane's cutSurfaceId either way. Left unchanged when omitted.",
+    )
+    customPen: int | None = Field(
+        None,
+        description="The pen of the cut edges when useCustom is true. Left unchanged when omitted.",
+        ge=1,
+        le=255,
+    )
+    customSurfaceId: AttributeId | None = Field(
+        None,
+        description="The surface of the cut faces when useCustom is true. Left unchanged when omitted.",
     )
 
 
@@ -9862,6 +10543,34 @@ class SetBuiltInPropertyValuesOfAttributesResult(APIModel):
     executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
         ...,
         description="One result per given property value, attribute by attribute, in the order of the input. The values of one attribute are written together, so an error of that write is the result of each of them.",
+    )
+
+
+class SetCategoryValuesOfDefaultsParameters(APIModel):
+    elementTypes: list[ElementType] = Field(
+        ...,
+        description="The element types whose tool defaults (the settings new elements get) are set.",
+        min_length=1,
+    )
+    categoryValues: list[DefaultCategoryValueData] = Field(
+        ...,
+        description="The category values to set for every element type: one category per item.",
+        min_length=1,
+    )
+    dryRun: bool | None = Field(
+        None,
+        description='If true, the command makes all the checks of a real run and resolves the same targets, with the same errors, but changes nothing in the project and creates no undo step. The response is that of a real run with "dryRun": true added, and says for each target what the real run would do. Default is false.',
+    )
+
+
+class SetCategoryValuesOfDefaultsResult(APIModel):
+    dryRun: Literal[True] | None = Field(
+        None,
+        description="Present, and true, only in the response of a dry run (the dryRun input was true): nothing was changed in the project.",
+    )
+    executionResults: list[SuccessfulExecutionResult | WouldChangeExecutionResult | FailedExecutionResult] = Field(
+        ...,
+        description="One result per element type and category value: for each element type, in the order of the input, one result per item of categoryValues, in their order. A real run reads each value back after setting it, and a value Archicad did not keep gets a failed execution result. On a dry run an item that passes every check made before writing (the element type is valid, the category and the value exist, and the tool defaults of the type have the category) gets wouldChange: oldValue is the default's value in the category now and newValue the value a real run would set, both as GetCategoryValuesOfDefaults gives them (type, categoryId, categoryValueId and name; oldValue has only type and categoryId when the default has no value in the category). Archicad can still refuse an item that passes them.",
     )
 
 
@@ -10077,6 +10786,27 @@ class SetDocumentFrom3DDefaultsParameters(APIModel):
 SetDocumentFrom3DDefaultsResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
 
 
+class SetElementFieldsParameters(APIModel):
+    elementsWithFields: list[ElementFieldsUpdate] = Field(
+        ..., description="The elements to change and the fields to write to each."
+    )
+    dryRun: bool | None = Field(
+        None,
+        description='If true, the command makes all the checks of a real run and resolves the same targets, with the same errors, but changes nothing in the project and creates no undo step. The response is that of a real run with "dryRun": true added, and says for each target what the real run would do. Default is false.',
+    )
+
+
+class SetElementFieldsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ...,
+        description="One result per element, aligned with the input. An element whose fields Archicad did not all keep fails with the fields and the values Archicad kept; the other fields of that element are changed. On a dry run, a successful result has wouldChange with the oldValue and newValue of the given fields.",
+    )
+    dryRun: Literal[True] | None = Field(
+        None,
+        description="Present, and true, only in the response of a dry run (the dryRun input was true): nothing was changed in the project.",
+    )
+
+
 class SetElementInfoStringsParameters(APIModel):
     elements: list[ElementInfoString]
 
@@ -10099,11 +10829,15 @@ class SetElementNotificationClientParameters(APIModel):
     )
     notifyOnModificationOfAnElement: bool | None = Field(
         None,
-        description='Notify on modification/deletion of an element. The observed elements are the ones ACAPI_Element_GetElemList returns, for API_ZombieElemID or, with elementTypesToObserve, for each of those types, when the first client asking for these notifications of them is registered, and every element of the observed types created after that. Archicad does not report the changes made by Tapir\'s own commands, so Tapir reports them itself for SetDetailsOfElements, SetPropertyValuesOfElements, MoveElements, RotateElements, MirrorElements (not for the copies they make, which are new elements), DeleteElements, DeleteSelectedElements, the Modify<Tool> commands (ModifyWalls, ModifyBeams, ModifySlabs, ModifyColumns, ModifyWindows, ModifyDoors, ModifyOpenings, ModifyMorphs, ModifyRoofs, ModifyShells, ModifyMeshes, ModifyObjects, ModifyLamps, ModifyTexts, ModifyLabels, ModifyCurtainWalls, ModifyCurtainWallFrames, ModifyZones, ModifySections, ModifyDetailMarkers, ModifyRailings, ModifyStairs), ChangeTextContent, SetGDLParametersOfElements, RunParameterScriptOfElements (only when the script changed the element), SetMarkerParametersOfElements, SetMarkerLibraryPartOfElements, ChangeLibraryPartOfElements, SetClassificationsOfElements, SetCategoryValuesOfElements, ModifyPropertyValueOfElements, SetElementInfoStrings, SetURLReferencesOfElements, SetIFCAttributesOfElements, SetIFCPropertiesOfElements, RemoveIFCPropertiesOfElements, SetIFCClassificationReferencesOfElements, RemoveIFCClassificationReferencesOfElements, LockElements, UnlockElements, SetOpeningDetails, SetOpeningFloorPlanParameters, SetOpeningSymbolParameters, CreateGroups and UngroupElements (the grouped elements), MoveElementsToDesignOptions, CreateSolidElementLinks, RemoveSolidElementLinks, CreateSolidOperations (the target and operator when the operation changed or deleted them; the results are new elements), TrimElements, RemoveElementTrims, MergeElements, UnmergeElements, ModifyMEPRoutingElements, ModifyMEPPorts (the element owning the port), ConnectMEPElements, ModifyMEPElements, SetMEPRoutingParameters, ModifyElectricalPanels, ModifyElectricalDevices and ConnectToElectricalCircuits. Of the elements these commands change, only the given ones are reported: an element deleted together with its owner (a door or window of a deleted wall) is not. UpdateZones is not reported by Tapir, because Archicad updates the Zones after the command has returned. When the user moves, rotates, mirrors, elevates, resizes or stretches elements in Archicad, each of their changedElements items also has a transformation: {"type": ..., ...}, where type is "Drag" (with displacement: {"x", "y", "z"}), "Elevate" (with displacement, only z is not 0), "Rotate" (with origin: {"x", "y"} and angle, in radians, counterclockwise), "Mirror" (with origin, a point of the mirror axis, and axisDirection: {"x", "y"}, its unit vector), "Resize" (with origin and ratio), "Stretch", "VerticalStretch", "PreservedHeightStretch", "PreservedDirectionStretch" or "General"; the changes made by Tapir\'s own commands and by undo or redo have no transformation. Optional parameter, by default true. Archicad attaches an observer to each element to observe (see elementTypesToObserve) when the first client asks for this, and detaches them when the last one stops, and it is blocked meanwhile: the time grows faster than the number of elements, from seconds for a few hundred elements to many minutes for a few thousand. Count the elements first (GetAllElements with IncludeSubElemObjects, or GetElementsByType) and limit the types on large projects.',
+        description='Notify on modification/deletion of an element. The observed elements are the ones ACAPI_Element_GetElemList returns, for API_ZombieElemID or, with elementTypesToObserve, for each of those types, when the first client asking for these notifications of them is registered, and every element of the observed types created after that, plus the elements listed in elementsToObserve. Archicad does not report the changes made by Tapir\'s own commands, so Tapir reports them itself for SetDetailsOfElements, SetPropertyValuesOfElements, MoveElements, RotateElements, MirrorElements (not for the copies they make, which are new elements), DeleteElements, DeleteSelectedElements, the Modify<Tool> commands (ModifyWalls, ModifyBeams, ModifySlabs, ModifyColumns, ModifyWindows, ModifyDoors, ModifyOpenings, ModifyMorphs, ModifyRoofs, ModifyShells, ModifyMeshes, ModifyObjects, ModifyLamps, ModifyTexts, ModifyLabels, ModifyCurtainWalls, ModifyCurtainWallFrames, ModifyZones, ModifySections, ModifyDetailMarkers, ModifyRailings, ModifyStairs, ModifyPolylines, ModifyHatches, ModifyChangeMarkers), ChangeTextContent, SetGDLParametersOfElements, RunParameterScriptOfElements (only when the script changed the element), SetMarkerParametersOfElements, SetMarkerLibraryPartOfElements, ChangeLibraryPartOfElements, SetClassificationsOfElements, SetCategoryValuesOfElements, ModifyPropertyValueOfElements, SetElementInfoStrings, SetURLReferencesOfElements, SetIFCAttributesOfElements, SetIFCPropertiesOfElements, RemoveIFCPropertiesOfElements, SetIFCClassificationReferencesOfElements, RemoveIFCClassificationReferencesOfElements, LockElements, UnlockElements, SetOpeningDetails, SetOpeningFloorPlanParameters, SetOpeningSymbolParameters, CreateGroups and UngroupElements (the grouped elements), MoveElementsToDesignOptions, CreateSolidElementLinks, RemoveSolidElementLinks, CreateSolidOperations (the target and operator when the operation changed or deleted them; the results are new elements), TrimElements, RemoveElementTrims, MergeElements, UnmergeElements, ModifyMEPRoutingElements, ModifyMEPPorts (the element owning the port), ConnectMEPElements, ModifyMEPElements, SetMEPRoutingParameters, ModifyElectricalPanels, ModifyElectricalDevices and ConnectToElectricalCircuits. Of the elements these commands change, only the given ones are reported: an element deleted together with its owner (a door or window of a deleted wall) is not. UpdateZones is not reported by Tapir, because Archicad updates the Zones after the command has returned. When the user moves, rotates, mirrors, elevates, resizes or stretches elements in Archicad, each of their changedElements items also has a transformation: {"type": ..., ...}, where type is "Drag" (with displacement: {"x", "y", "z"}), "Elevate" (with displacement, only z is not 0), "Rotate" (with origin: {"x", "y"} and angle, in radians, counterclockwise), "Mirror" (with origin, a point of the mirror axis, and axisDirection: {"x", "y"}, its unit vector), "Resize" (with origin and ratio), "Stretch", "VerticalStretch", "PreservedHeightStretch", "PreservedDirectionStretch" or "General"; the changes made by Tapir\'s own commands and by undo or redo have no transformation. Optional parameter, by default true. Archicad attaches an observer to each element to observe (see elementTypesToObserve and elementsToObserve) when the first client asks for this, and detaches them when the last one stops, and it is blocked meanwhile: one element at a time (the Archicad API has no call for many elements or a whole type), about 10 elements per second on a large project, and the time grows faster than the number of elements. Count the elements first (GetAllElements with IncludeSubElemObjects, or GetElementsByType) and limit the types, or list the elements with elementsToObserve, on large projects.',
     )
     elementTypesToObserve: list[ElementType] | None = Field(
         None,
-        description="Only modifications/deletions of elements of these types are observed and notified to this client. Optional parameter, by default every element (including the parts of curtain walls, stairs and railings, which are most of the elements of large projects). Registering the same client again with other types changes them; only the elements of types no client observed before get an observer then. Does not limit the other notifications.",
+        description="Only modifications/deletions of elements of these types are observed and notified to this client, together with the elements of elementsToObserve. Optional parameter, by default (when neither elementTypesToObserve nor elementsToObserve is given) every element (including the parts of curtain walls, stairs and railings, which are most of the elements of large projects). Registering the same client again with other types changes them; only the elements of types no client observed before get an observer then. Does not limit the other notifications.",
+    )
+    elementsToObserve: list[ElementIdArrayItem] | None = Field(
+        None,
+        description="Only modifications/deletions of these elements are observed and notified to this client, together with the elements of the types of elementTypesToObserve. Only these elements get an observer, so registering takes time in proportion to their number, not to the size of the project (#2493). Unlike elementTypesToObserve, it does not cover the elements created later: with elementsToObserve alone, the changes of a new element are not notified (notifyOnNewElement still reports its creation); register the client again with the new element in the list to observe it. A listed element that does not exist fails the command, and the client is then not registered or changed. Registering the same client again with another list changes it; only the elements no client observed before get an observer then, and the ones no client needs any more lose theirs. Optional parameter, by default every element (see elementTypesToObserve). Does not limit the other notifications.",
     )
     notifyOnReservationChanges: bool | None = Field(
         None,
@@ -10177,6 +10911,28 @@ class SetElementUserDataParameters(APIModel):
 class SetElementUserDataResult(APIModel):
     executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
         ..., description="One result per input item, in the input order."
+    )
+
+
+class SetFieldsOfElementDefaultsParameters(APIModel):
+    fieldsOfElementDefaults: list[ToolDefaultFieldsUpdate] = Field(
+        ...,
+        description="The element types whose tool defaults change and the fields to write to each.",
+    )
+    dryRun: bool | None = Field(
+        None,
+        description='If true, the command makes all the checks of a real run and resolves the same targets, with the same errors, but changes nothing in the project and creates no undo step. The response is that of a real run with "dryRun": true added, and says for each target what the real run would do. Default is false.',
+    )
+
+
+class SetFieldsOfElementDefaultsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ...,
+        description="One result per item, in the input order. Tool defaults whose fields Archicad did not all keep fail with the fields and the values Archicad kept; the other fields are changed. On a dry run, a successful result has wouldChange with the oldValue and newValue of the given fields.",
+    )
+    dryRun: Literal[True] | None = Field(
+        None,
+        description="Present, and true, only in the response of a dry run (the dryRun input was true): nothing was changed in the project.",
     )
 
 
@@ -10315,6 +11071,16 @@ class SetIFCPropertiesOfElementsParameters(APIModel):
 
 
 class SetIFCPropertiesOfElementsResult(APIModel):
+    executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
+        ..., description="A list of execution results."
+    )
+
+
+class SetInteriorElevationsDetailsParameters(APIModel):
+    interiorElevationsWithDetails: list[InteriorElevationWithDetails]
+
+
+class SetInteriorElevationsDetailsResult(APIModel):
     executionResults: list[SuccessfulExecutionResult | FailedExecutionResult] = Field(
         ..., description="A list of execution results."
     )
@@ -10778,7 +11544,7 @@ class SetPropertyValuesOfElementDefaultsResult(APIModel):
 
 
 class SetPropertyValuesOfElementsParameters(APIModel):
-    elementPropertyValues: list[ElementPropertyValueWithValue | ElementPropertyValueWithStatus] = Field(
+    elementPropertyValues: list[ElementPropertyValue] = Field(
         ...,
         description="A single real value accepts '.' or ',' as the decimal separator, so the value strings GetPropertyValuesOfElements returns can be written back: when both appear the last one is the decimal separator, a separator that appears more than once groups thousands, and a single separator is the decimal one. Unitless real and integer lists accept semicolon-separated numbers; an empty string sets an empty list. Invalid items reject the entire property write.",
     )
@@ -10814,9 +11580,30 @@ class SetStoriesParameters(APIModel):
         ...,
         description="A list of story settings, used as input for creating or modifying multiple stories.",
     )
+    dryRun: bool | None = Field(
+        None,
+        description="If true, nothing is changed in the project and no undo step is created: the list is checked as in a real run, and the response lists the existing stories a real run would delete (with the number of elements Archicad would delete with each) and the number of stories it would insert. Default is false.",
+    )
 
 
-SetStoriesResult: TypeAlias = SuccessfulExecutionResult | FailedExecutionResult
+class SetStoriesResult(APIModel):
+    success: bool = Field(
+        ...,
+        description="Whether the story structure was set, or on a dry run, whether the list passed the checks a real run makes first.",
+    )
+    error: Error | None = None
+    wouldDeleteStories: list[WouldDeleteStory] | None = Field(
+        None,
+        description="Only on a successful dry run: the existing stories a real run would delete, from the bottom up. Empty when it would delete none.",
+    )
+    wouldInsertStoryCount: int | None = Field(
+        None,
+        description="Only on a successful dry run: the number of new stories a real run would add below and above the existing ones until they reach the requested indices. When the requested indices leave a gap above or below the existing stories, this includes the stories in the gap, which the real run deletes again.",
+    )
+    dryRun: Literal[True] | None = Field(
+        None,
+        description="Present, and true, only in the response of a dry run (the dryRun input was true): nothing was changed in the project.",
+    )
 
 
 class SetStructureDisplayParameters(APIModel):
@@ -10930,7 +11717,7 @@ SetZoneLabelingSettingsResult: TypeAlias = SuccessfulExecutionResult | FailedExe
 class SetZoomParameters(APIModel):
     zoomBox: Zoom = Field(
         ...,
-        description="The area to zoom the current 2D window to, in model coordinates (meters). The window keeps its aspect ratio, so the shown area may be larger than the box. The rotation of the window is kept as it is.",
+        description="The area to zoom the current 2D window to, in model coordinates (meters). The window keeps its aspect ratio, so the shown area may be larger than the box. The rotation of the window is kept as it is; in a rotated window the whole box is shown, so the shown area is larger than the box.",
     )
 
 

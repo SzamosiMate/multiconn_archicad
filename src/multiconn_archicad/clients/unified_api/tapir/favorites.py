@@ -76,6 +76,7 @@ from multiconn_archicad.models.tapir.types import (
     FavoriteKeepField,
     FavoriteNameAndFolder,
     FavoriteRename,
+    FavoriteSettingGroup,
     FavoriteSettings,
     FavoriteSettingsSource,
     FavoriteSummary,
@@ -164,6 +165,7 @@ class FavoritesCommands:
         favorite: None | str = None,
         elements: None | list[ElementIdArrayItem] = None,
         filter: ElementTypeFloorLayerFilter | None = None,
+        setting_groups: None | list[FavoriteSettingGroup] = None,
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Apply the given favorites to existing elements. Only settings-type parameters are
@@ -172,13 +174,17 @@ class FavoritesCommands:
         its wall, marker and placement, and takes the Favorite's library part and parameters,
         size included. For the hierarchical types (Stair, Railing, Curtain Wall) the settings of
         the sub-elements are not applied, because they are inseparable from the Favorite's own
-        geometry. By default settings, classifications, categories and properties are all
-        applied; each can be opted out of individually. keepFields lists fields of the target
-        (its ID, layer, an opening's width, height and sill height, a Wall's reference line
-        location, height and top link) that are copied back after the Favorite has been applied,
-        so that e.g. only the library part or the wall type changes. With favorite instead of
-        favoritesToApply, one Favorite is read once and applied to the given elements, or to
-        every element of its type that matches the filter.
+        geometry. The cross section of a Column or Beam is a Favorite setting and is applied
+        too. By default settings, classifications, categories and properties are all applied;
+        each can be opted out of individually. keepFields lists fields of the target (its ID,
+        layer, an opening's width, height and sill height, a Wall's reference line location,
+        height and top link, a Column's height, top link and cross section width and depth, a
+        Beam's cross section width and height) that are copied back after the Favorite has been
+        applied, so that e.g. only the library part or the wall type changes. settingGroups is
+        the positive list instead: e.g. only FloorPlanAndSection applies just the pens, line
+        types, story visibility and cut and cover fills of a Column or Beam, and nothing else of
+        the Favorite. With favorite instead of favoritesToApply, one Favorite is read once and
+        applied to the given elements, or to every element of its type that matches the filter.
 
         Args:
             favorites_to_apply (None | list[FavoriteToApply]): The elements and the Favorite to
@@ -187,12 +193,13 @@ class FavoritesCommands:
                 parameters (structure, materials, pens, etc.). Geometry (position, floor, and
                 dimensions such as a Wall's height) is never applied - the element stays on its
                 own home story - except that a Window or Door takes the Favorite's library part
-                and parameters, size included, while keeping its wall, marker and placement. For
-                the hierarchical types (Stair, Railing, Curtain Wall) the settings of the sub-
-                elements are not applied, because they are inseparable from the Favorite's own
-                geometry. A Dimension's text size, text pen and text frame are not changed
-                (tested in Archicad 28): the dimension creation commands take textHeight,
-                textPen and textFrame for them. Default is true.
+                and parameters, size included, while keeping its wall, marker and placement. A
+                Stair keeps its own baseline and flight width. For the hierarchical types
+                (Stair, Railing, Curtain Wall) the settings of the sub-elements are not applied,
+                because they are inseparable from the Favorite's own geometry. A Dimension's
+                text size, text pen and text frame are not changed (tested in Archicad 28): the
+                dimension creation commands take textHeight, textPen and textFrame for them.
+                Default is true.
             apply_classifications (None | bool): Whether to apply the Favorite's
                 classifications. Default is true.
             apply_categories (None | bool): Whether to apply the Favorite's element categories
@@ -205,11 +212,13 @@ class FavoritesCommands:
                 type) take effect. 'id' and 'layerIndex' apply to every element type; 'width',
                 'height' and 'sillHeight' to a Window or Door ('width' and 'height' also to a
                 Skylight); 'height', 'topOffset' and 'relativeTopStory' to a Wall or Column;
-                'referenceLineLocation' to a Wall. A field the target's type does not have is
-                ignored. To keep a Wall's or Column's top exactly as it was, keep 'height',
-                'relativeTopStory' and 'topOffset' together - a kept 'height' alone is
-                recomputed by Archicad while the Favorite's relativeTopStory links the top to a
-                story. Default: nothing is kept.
+                'referenceLineLocation' to a Wall; 'width' and 'depth' (the cross section) to a
+                Column, and 'width' and 'height' (the cross section) to a Beam. The cross
+                section of a Column or Beam is a Favorite setting and is applied unless it is
+                kept. A field the target's type does not have is ignored. To keep a Wall's or
+                Column's top exactly as it was, keep 'height', 'relativeTopStory' and
+                'topOffset' together - a kept 'height' alone is recomputed by Archicad while the
+                Favorite's relativeTopStory links the top to a story. Default: nothing is kept.
             favorite (None | str): The name of one Favorite to apply to many elements, instead
                 of favoritesToApply: to the given elements, or without elements to every element
                 of the Favorite's type that matches the filter. The Favorite is read only once.
@@ -220,6 +229,20 @@ class FavoritesCommands:
                 single favorite. Without elements the favorite is applied to every element of
                 its type that matches it; an element of elements that does not match it gets a
                 failed execution result. Only with favorite.
+            setting_groups (None | list[FavoriteSettingGroup]): Apply only these panels of the
+                Favorite's settings dialog, and nothing else of it - a positive list instead of
+                keepFields. 'FloorPlanAndSection' applies the Floor Plan and Section settings:
+                story visibility (Show on Stories), floor plan display and projection, the pens
+                and line types of the cut, uncut, overhead and hidden lines (a Beam's reference
+                axis too), the cut fill pens and the cover fill; geometry, size, cross section,
+                building material, profile, layer and the other panels stay the target's. It is
+                supported for Column and Beam elements; another element type gets a failed
+                execution result and is left unchanged. 'ClassificationAndProperties' applies
+                the Favorite's classifications, element categories (e.g. structural function)
+                and property values, each still only when its own apply flag is not false;
+                without it in the list none of them is applied. applySettings false turns
+                'FloorPlanAndSection' off. keepFields still applies. Default: the whole Favorite
+                is applied as described for applySettings.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
@@ -240,6 +263,7 @@ class FavoritesCommands:
             "applyCategories": apply_categories,
             "applyProperties": apply_properties,
             "keepFields": keep_fields,
+            "settingGroups": setting_groups,
         }
         validated_params = ApplyFavoritesToElementsParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
