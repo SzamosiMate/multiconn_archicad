@@ -17,8 +17,12 @@ Run commands from the repository root with the project environment active. On Wi
 | Refresh the shipped Unified API signatures after a release | `python -m code_generation.unified.api_generator.shipped_signatures <release-tag>` |
 | Run the routine suite used by PR and main CI | `python -m pytest` |
 | Validate generated schemas after unified generation | `python -m pytest --schema-tests=deep tests/generated tests/code_generation` |
+| Run the same full deep scope in parallel | `python -m code_generation.run_deep_tests --workers 4` |
+| Validate the same deep scope in parallel | `python -m code_generation.run_deep_tests --workers 4` |
 
 The model pipelines generate tests; they do not execute pytest. Neither model pipeline automatically runs unified generation. Finish a Tapir update with unified generation and test execution after the model audit/repair loop is clean. Tapir fetching needs network access; mock HTTP integration tests need localhost socket access.
+
+During diagnosis and repairs, omit `--check-reproducibility` for a single Tapir pass (which still runs formatting and strict audit). Batch related fixes, run focused regressions and finish semantic review first. Run the complete two-pass command above once the candidate is stable, then unified generation and final tests. Repeat checks only when later changes invalidate them.
 
 The repository's `multiconn-codegen` skill governs explicitly requested Tapir/unified generation and review. The separate `multiconn-upstream-patches` skill investigates implementation-source changes when that workflow is requested; a model update does not automatically start upstream work.
 
@@ -39,6 +43,16 @@ Stage order is declared in [`tapir/run_tapir_pipeline.py`](../tapir/run_tapir_pi
 Command membership comes from actual input/output schemas, not a static inventory of every extracted model. Patched definitions whose names are not command parameter/result names become common types. The schema stage also writes name lists, command metadata and command literals at the path imported by the client.
 
 Both code-generator calls retain `keep_model_order=False`. Alphabetizing commands happens after splitting, when their common types are explicit imports, so shared-type extraction or enum refactoring no longer changes command placement. Common models retain dependency order for aliases and forward references. This stabilizes the final Tapir command modules; intermediate combined files and common-type files can still move when dependencies change.
+
+### Constructible conditional objects
+
+[`shared/conditional_models.py`](../shared/conditional_models.py) owns Python compatibility policy independently of schema patching. Only `RoofLevel` and `ElementPropertyValue` opt in. Their generic Pydantic names remain constructible classes. The registry records previously published helper names and their historical required-field groups; those groups identify compatibility constructors, not the current validation contract.
+
+Generation derives current properties, common required fields and `anyOf` alternatives from the effective schema. It accepts an object with inline required-only alternatives or references to objects differing only in required fields. A transient input projection supplies a common object and each current variant to datamodel-codegen. The cleaner emits the parent as a [`UnionModel`](../../src/multiconn_archicad/models/union.py), concrete subclasses overriding only required fields, and `bind_variants(Parent, First | Second)`. Binding uses Pydantic's `TypeAdapter` for validation, serialization and native union JSON Schema. The parent constructor returns a concrete subclass; it remains usable as a common type annotation and with `model_validate`/`model_json_schema`. Both complete alternatives can be supplied without losing fields. TypedDicts retain their alternative required-key unions.
+
+The projection does not edit either saved wire-schema snapshot or call schema-patching helpers. Removing a retired extraction patch, renaming upstream branches or reordering them does not remove this compatibility policy. Missing published helper definitions are regenerated from matching current alternatives. New required-field alternatives get deterministic `ParentWithFieldAndField` names in the projection. Incompatible branch constraints, unsupported union forms, naming collisions or lost historical alternatives fail for review. True heterogeneous unions and `oneOf` contracts are not opted into this feature.
+
+Published variants inherit from their generic parent, retain stronger required-field annotations and remain valid request input. The cleaner emits each complete family and binding before consumers capture the parent's core schema. Optional fields use ordinary Pydantic `None` defaults and the existing None-omitting request serialization. The common class carries optional field annotations; use the concrete subclass when code needs a statically required field. Static interfaces for [`APIModel`](../../src/multiconn_archicad/models/base.pyi) and [`UnionModel`](../../src/multiconn_archicad/models/union.pyi) preserve constructor inference and reject unrelated types despite their configurable runtime bases. The shared wrap serializer intentionally has no return annotation, so serialization-mode JSON Schema retains field contracts rather than becoming an unconstrained return schema.
 
 An explicit version argument updates `SUPPORTED_TAPIR_VERSION` in `src/multiconn_archicad/constants.py`; the runner also synchronizes the README badge. Without that argument, the version remains pinned. The unpatched schema is consolidated and normalized released documentation, not Tapir implementation source or upstream `main`.
 
@@ -112,6 +126,15 @@ Hypothesis generation uses copied test schemas with targeted recursion bounds or
 After audit passes, review added/changed public models, consumers, alias preservation, requiredness, enum identity and return unwrapping. Distinguish the checked-in diff baseline, initial working changes and the actual previous client API. An upstream difference already corrected by a local patch is not a new client migration. Widening wire enum values can still replace a Python enum class and affect member equality or validation.
 
 Plain `pytest` runs the handwritten, integrity, and deterministic generated tests plus the fixed sample of generated property tests in `tests/conftest.py`. The generated sample uses one example per test. After unified generation, run the deep command above for every generated property test in the selected paths with a ten-example budget. For a Tapir-only update, select `tests/generated/test_generated_tapir_models.py`, `tests/generated/test_generated_tapir_methods.py`, `tests/generated/test_model_integrity.py`, and `tests/code_generation`. Include both APIs when shared generator logic changes. Use the deep option with a test ID to reproduce a case outside the routine sample.
+
+The parallel runner uses separate Python processes without an additional pytest plugin dependency. It defaults to at most four workers and the full `tests/generated tests/code_generation` scope. Run from the repository root; arguments after `--` replace that scope and must start with a test path:
+
+```text
+python -m code_generation.run_deep_tests --workers 4 -- tests/generated/test_generated_tapir_models.py tests/generated/test_generated_tapir_methods.py tests/generated/test_model_integrity.py tests/code_generation
+python -m code_generation.run_deep_tests --workers 2 -- tests/generated/test_generated_tapir_models.py -k GraphicOverride
+```
+
+Each worker collects the same requested scope and executes a disjoint partition. Full per-worker logs include the slowest test durations; failed node IDs and phases are printed as they arrive. Logs and JSON manifests are retained in a new temporary directory, or an empty directory supplied with `--log-dir`. `summary.json` is written only after matching collections and complete, unique partition execution are verified. It records passed/failed/skipped totals and per-test collection counts; an interrupted, fail-fast or mismatched run cannot establish full coverage. Expected empty partitions are allowed. Compare discovery counts with the baseline when changing type factories or collectors: consistent partitions alone cannot detect a definition omitted by every worker. Use serial pytest for collection-only inspection. More workers use more memory and do not reduce the selected tests or the deep example budget.
 
 Distinguish generated/mocked checks from live Archicad validation, formatting from lint, and same-process reproducibility from cross-process checks. Documentation-only changes do not require rerunning generation.
 

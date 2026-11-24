@@ -119,7 +119,7 @@ def _public_definition_names(path: Path, tree: ast.Module) -> Iterable[tuple[str
             isinstance(node, ast.Assign)
             and isinstance(node.value, ast.Call)
             and isinstance(node.value.func, ast.Name)
-            and node.value.func.id == "TypedDict"
+            and node.value.func.id in {"TypedDict", "OpenTypedDict"}
         ):
             for target in node.targets:
                 if isinstance(target, ast.Name):
@@ -179,7 +179,10 @@ def run_audit() -> list[Finding]:
     findings.extend(audit_generated_names(trees))
     result = subprocess.run(
         [sys.executable, "-m", "code_generation.shared.default_policy_audit", "--provider", "tapir"],
-        capture_output=True, text=True, encoding="utf-8", check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        check=False,
     )
     if result.returncode:
         findings.append(Finding("default-policy", "tapir", result.stdout + result.stderr))

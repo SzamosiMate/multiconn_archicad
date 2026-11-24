@@ -1,6 +1,13 @@
 """Python compatibility names emitted by both Tapir model splitters."""
 
 TAPIR_TYPE_ALIASES = {
+    "ElementPair": "ElementTrimPair",
+    "CurtainWallFrameTypeUpdate": "CurtainWallFrameObjectType",
+    "DimensionMarkerUpdate": "DimensionMarker",
+    "RoofPivotEdgeUpdate": "RoofPivotEdgeChange",
+    "StairBaselineEdgeData": "StairBaseLineEdge",
+    "StairBaselineVertexData": "StairBaseLineVertex",
+    "SymbolLabelTextDirection": "LabelTextDirection",
     "Angle": "AngleUnitFormat",
     "Area": "CalculationUnitAreaFormat",
     "ConflictPolicy": "FavoriteImportConflictPolicy",

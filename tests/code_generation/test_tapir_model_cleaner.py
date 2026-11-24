@@ -9,6 +9,23 @@ cleaner = importlib.import_module("code_generation.tapir.model_generators.03_mod
 pytestmark = pytest.mark.unit
 
 
+@pytest.mark.parametrize("base", ["Enum", "IntEnum"])
+def test_numeric_and_string_enums_remain_importable_after_cleaning_and_splitting(base):
+    splitter = importlib.import_module("code_generation.tapir.model_generators.04_split_models")
+    source = f"from enum import {base}\n\nclass Example({base}):\n    VALUE = 45\n"
+    cleaned = cleaner.assemble_final_file(source)
+    namespace = {}
+    exec(cleaned, namespace)
+    assert namespace["Example"](45).value == 45
+
+    split = splitter.remove_unused_imports(
+        "\n".join(splitter.get_header_lines()) + f"\n\nclass Example({base}):\n    VALUE = 45\n"
+    )
+    namespace = {}
+    exec(split, namespace)
+    assert namespace["Example"](45).value == 45
+
+
 @pytest.mark.parametrize("annotated", [False, True])
 @pytest.mark.parametrize("nullable", [False, True])
 @pytest.mark.parametrize(

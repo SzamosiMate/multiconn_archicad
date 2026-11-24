@@ -172,3 +172,30 @@ def test_response_schema_keeps_nested_error_variants(master_schema):
         }
     )
     assert reachable_response_schema(wire, definitions, "official") == wire
+
+
+@pytest.mark.parametrize("input_data", [{}, {"method": "General"}, {"method": None}])
+def test_generated_payload_expectation_applies_method_defaults(tmp_path, master_schema, input_data):
+    from inspect import signature
+    from multiconn_archicad.clients.unified_api.tapir.application import ApplicationCommands as TapirApplicationCommands
+
+    tests = test_generator.TestGenerator({}, tmp_path)
+    tests._master_schemas["tapir"] = master_schema
+    details = {
+        "name": "GetPolygonFromUser",
+        "source": "tapir",
+        "group": "Application Commands",
+        **generate("GetPolygonFromUser"),
+    }
+    code = tests._generate_test_for_command(details)
+    function = ast.parse(code).body[0]
+    function.decorator_list.clear()
+    namespace = {
+        "TapirApplicationCommands": TapirApplicationCommands,
+        "MagicMock": MagicMock,
+        "camel_to_snake": camel_to_snake,
+        "commands": commands,
+        "signature": signature,
+    }
+    exec(ast.unparse(function), namespace)
+    namespace[function.name](input_data, {"cancelled": False})

@@ -5,25 +5,25 @@ from hypothesis import strategies as st
 from hypothesis_jsonschema import from_schema
 
 
-def _limit_test_examples(value: object, *, bound_arrays: bool) -> None:
+def _limit_test_examples(value: object) -> None:
     if isinstance(value, dict):
         if value.get("type") == "object" and value.get("properties"):
             # Exercise declared fields when the schema leaves extra keys unspecified.
             value.setdefault("additionalProperties", False)
-        if bound_arrays and value.get("type") == "array" and "maxItems" not in value:
+        if value.get("type") == "array" and "maxItems" not in value:
             value["maxItems"] = max(2, value.get("minItems", 0))
         for child in value.values():
-            _limit_test_examples(child, bound_arrays=bound_arrays)
+            _limit_test_examples(child)
     elif isinstance(value, list):
         for child in value:
-            _limit_test_examples(child, bound_arrays=bound_arrays)
+            _limit_test_examples(child)
 
 
 def _build_schema_strategy(schema_json: str) -> st.SearchStrategy:
     schema = json.loads(schema_json)
-    # Keep nested members, contours and segments within Hypothesis's entropy budget.
-    bound_arrays = schema.get("$ref") == "#/$defs/CreateElementsFromAnalyticalMembersParameters"
-    _limit_test_examples(schema, bound_arrays=bound_arrays)
+    # Keep synthetic batches within Hypothesis's entropy budget for every API.
+    # Released/runtime schemas are unchanged; explicit size constraints win.
+    _limit_test_examples(schema)
     return from_schema(schema)
 
 
