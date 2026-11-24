@@ -39,22 +39,26 @@ Examples are `$multiconn-codegen audit`, `$multiconn-codegen regenerate tapir`, 
 - Never load an entire generated schema or generated model file into context. Use parsers or short one-off scripts for structural comparisons and counts.
 - Inspect the full diff conceptually by enumerating and classifying all changed definitions and hunks; this does not require printing the complete diff at once.
 - Small hand-written generator modules may be read in full when their overall control flow matters.
+- Keep one structural inventory per candidate and update affected entries after repairs. Save full diagnostics in scratch logs; print failure names and bounded excerpts, especially when tracebacks embed entire serialized schemas. Finalize reports after the candidate is stable rather than repeatedly rebuilding them during diagnosis.
 
 ## Generate and repair
 
-1. Run the requested operation with the project environment's Python:
+1. Start with the requested operation using the project environment's Python. Use a single generation pass during diagnosis and repair:
 
    ```text
    audit:              python -m code_generation.tapir.generation_audit --strict
-   regenerate tapir:   python -m code_generation.tapir.run_tapir_pipeline --check-reproducibility
+   regenerate tapir:   python -m code_generation.tapir.run_tapir_pipeline
    regenerate unified: python -m code_generation.unified.api_generator.run_pipeline
-   update tapir:       python -m code_generation.tapir.run_tapir_pipeline --tapir-version <version> --check-reproducibility
+   update tapir:       python -m code_generation.tapir.run_tapir_pipeline --tapir-version <version>
    ```
 
 2. For audit-only work, run the audit against the current outputs without regenerating them. For Tapir regeneration or update, let the complete Tapir pipeline and audit report all findings. Do not stop after resolving only the first audit finding.
 3. Diagnose every finding from the unpatched schema, patched schema, generator code, and generated diff. Never edit generated Python files directly except for the narrowly scoped unified-generation bootstrap described below.
-4. Make the smallest source change that fixes the whole class of problem, then rerun the complete Tapir pipeline. Continue until its strict audit, reproducibility check, and formatter pass; then regenerate the unified API and run tests.
-5. If a failure requires a product or public-API decision that cannot be inferred safely, finish all independent findings and report the remaining decision instead of guessing.
+4. Batch related findings into source fixes for the whole demonstrated problem class. Run focused generator regressions first, then regenerate the affected outputs with one Tapir pass, including its formatter and strict audit. Complete semantic review before paying for acceptance checks. Do not rerun the full deep suite or two-pass generation after each individual edit.
+5. Once the Tapir candidate is stable, run `python -m code_generation.tapir.run_tapir_pipeline --check-reproducibility` against the now-pinned version, then regenerate unified output and run acceptance tests as described below. The single-pass repair loop does not replace this final complete-pipeline check.
+6. If acceptance exposes a late failure, reproduce it by node ID, fix the class and verify related consumers before another full run. Repeat only checks invalidated by the repair: a test-helper-only change does not require model regeneration; a schema/generator change does. If a failure requires a product or public-API decision that cannot be inferred safely, finish all independent findings and report the remaining decision instead of guessing.
+
+Keep release input stable across reproducibility passes. When a download stalls or needs repair, prefer a bounded network timeout and a version/URL-keyed cache in the fetch layer over a temporary pipeline wrapper; cache successful responses only and surface fetch failures. Do not repeatedly restart generation around an unresolved download or reuse a different release's input.
 
 ### Classify schema patches
 
@@ -95,6 +99,8 @@ After the deterministic audit passes, inspect every added or structurally change
 
 For a suspected rename, duplicate, or retired extraction, run `python -m code_generation.shared.schema_match <schema.json> <definition> --path /properties/<field> --against <candidate-schema.json>`. Omit `--path` for a named definition and `--against` to search the same snapshot. Use `--candidate <name>` to inspect structural differences against a specific definition. The report separates annotations from structural differences and lists reference sites. Check the command and field context before reusing a name or retiring a patch. Equal schemas can represent different concepts, such as `ElementId` and `AttributeId`.
 
+Batch related comparisons against the same snapshots; the Python `match_definitions` API can reuse loaded definitions. Prefer a known candidate over an exhaustive search when available. Retain the useful decisions and differences without repeatedly matching unaffected definitions or dumping every successful comparison into context.
+
 Known semantic error types are:
 
 - context-free or overly broad names that should include their domain or role;
@@ -119,11 +125,14 @@ If the run exposes a deterministic failure class not covered by the audit, or a 
 - Do not remove imports speculatively. If the traceback does not prove this known stale-import case, or the retry fails for another reason, diagnose it normally.
 - When output routing changes, verify that command literals target `src/multiconn_archicad/clients/core/literal_commands.py` and unified output targets `src/multiconn_archicad/clients/unified_api`, matching the modules imported by the client. A successful pipeline alone does not establish that the consumed package was updated.
 - After successful unified generation, automatically stage newly created generated Python files under `src/multiconn_archicad/clients/unified_api/`. Identify untracked or newly added paths in that directory, verify their generated-file header and pipeline ownership, and use `git add -- <exact paths>` for those files only. Do not stage unrelated files or modifications to previously tracked unified API files. Preserve existing staged changes. This applies to Tapir updates and either regeneration operation; audit-only work stays read-only.
-- Run tests after unified generation succeeds. For Tapir regeneration or update, run routine `python -m pytest` and deep schema validation for the generated Tapir model and command tests, model integrity, and generator regressions. For standalone unified regeneration, run deep validation for the generated method tests and any relevant generator regressions. Use `--schema-tests=deep` with the relevant paths from the [code generation guide](../../../code_generation/documentation/archicad_api_codegen_brief.md). Respect requests for narrower test scope.
+- After unified generation succeeds, first reproduce known failures and exercise changed contracts with focused deep node IDs, including consumers of changed shared types. Then run routine `python -m pytest` and the required full deep scope once the candidate is stable. For Tapir regeneration or update, include generated Tapir models and methods, model integrity and generator regressions; include Official tests when shared generation logic changes. For standalone unified regeneration, select generated method tests and relevant generator regressions. Respect requests for narrower scope.
+- Use `python -m code_generation.run_deep_tests --workers 4` for parallel deep validation of all generated tests and generator regressions. Pass narrower paths and pytest options after `--`, starting with a path; scope examples are in the [code generation guide](../../../code_generation/documentation/archicad_api_codegen_brief.md). Choose workers for available memory and CPU; each process imports the models and collects the selected suite. The runner keeps logs/manifests in a fresh temporary directory (or an empty `--log-dir`), reports failures promptly, and rejects collection drift, missing/duplicate execution and incomplete workers. Read `summary.json` and relevant failure logs; skipped cases are not passes. A failed/interrupted or fail-fast run is diagnostic evidence, not full acceptance.
+- Keep the ten-example deep budget and the shared synthetic-size/recursion bounds. A low example count does not bound generation or shrinking time. Diagnose oversized or recursive strategies at their shared source and verify all referencing roots; do not add command-by-command limits or suppress additional health checks to obtain a green run. Preserve runtime schema constraints and distinguish bounded synthetic coverage from exhaustive payload coverage.
+- When changing type factories or test discovery, compare the manifest's per-test collection counts with the baseline and independently check that expected Pydantic and TypedDict definitions are collected. A partition coverage check proves execution of the collected nodes, not that discovery found every model. Investigate unexplained count drops before accepting a green suite. Use the recorded pytest durations to identify actual slow cases; deterministic integrity checks need not be repeated throughout the repair loop.
 
 ### Check reproducibility proportionally
 
-Keep the complete-pipeline reproducibility check. When changing test-schema dependency traversal or investigating ordering noise, add a focused check in separate processes with different `PYTHONHASHSEED` values. A same-process rerun can miss randomized set iteration. Compare contents and ordering at the affected collector; do not claim whole-pipeline cross-process reproducibility from a focused check. Avoid routine repeated full-suite runs or unrelated generator/lint cleanup.
+Keep one final complete-pipeline reproducibility check for a stable candidate; repeat it when a later schema/generator repair invalidates it. When changing test-schema dependency traversal or investigating ordering noise, add a focused check in separate processes with different `PYTHONHASHSEED` values. A same-process rerun can miss randomized set iteration. Compare contents and ordering at the affected collector; do not claim whole-pipeline cross-process reproducibility from a focused check. Avoid routine repeated full-suite runs or unrelated generator/lint cleanup.
 
 ## Review the result
 
