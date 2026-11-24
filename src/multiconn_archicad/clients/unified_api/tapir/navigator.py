@@ -12,12 +12,20 @@ from multiconn_archicad.models.tapir.commands import (
     ChangeAddOnViewpointsResult,
     ChangeDrawingLinkParameters,
     ChangeDrawingLinkResult,
+    ChangeLayoutSubsetSettingsParameters,
+    ChangeLayoutSubsetSettingsResult,
     CloneProjectMapItemToViewMapParameters,
     CloneProjectMapItemToViewMapResult,
+    Create3DDocumentsParameters,
+    Create3DDocumentsResult,
     Create3DStylesParameters,
     Create3DStylesResult,
     CreateAddOnViewpointsParameters,
     CreateAddOnViewpointsResult,
+    CreateCameraSetsParameters,
+    CreateCameraSetsResult,
+    CreateCamerasParameters,
+    CreateCamerasResult,
     CreateDetailMarkersParameters,
     CreateDetailMarkersResult,
     CreateDetailsParameters,
@@ -94,12 +102,17 @@ from multiconn_archicad.models.tapir.commands import (
     GetViewOptionsResult,
     GetViewSettingsParameters,
     GetViewSettingsResult,
+    ModifyCameraSetsParameters,
+    ModifyCameraSetsResult,
+    ModifyCamerasParameters,
+    ModifyCamerasResult,
     ModifyDetailMarkersParameters,
     ModifyDetailMarkersResult,
     ModifySectionsParameters,
     ModifySectionsResult,
     MoveNavigatorItemParameters,
     PublishPublisherSetParameters,
+    PublishPublisherSetResult,
     RenameNavigatorItemParameters,
     ReorderNavigatorItemsParameters,
     ReorderNavigatorItemsResult,
@@ -117,6 +130,8 @@ from multiconn_archicad.models.tapir.commands import (
     SetDocumentFrom3DDefaultsParameters,
     SetGhostStorySettingsParameters,
     SetGridSettingsParameters,
+    SetInteriorElevationsDetailsParameters,
+    SetInteriorElevationsDetailsResult,
     SetLayoutSettingsParameters,
     SetLayoutSettingsResult,
     SetMasterLayoutContextParameters,
@@ -145,8 +160,14 @@ from multiconn_archicad.models.tapir.types import (
     AddOnViewpointId,
     AddOnViewpointIdArrayItem,
     AddOnViewpointModificationData,
+    AttributeId,
     AxonometricProjectionSettings,
+    CameraData,
+    CameraModificationData,
     CameraSet,
+    CameraSetData,
+    CameraSetModificationData,
+    ChangedLayoutSubset,
     ColorRGB,
     CreatedDatabase,
     CreatedLayoutWithPlacementError,
@@ -161,6 +182,7 @@ from multiconn_archicad.models.tapir.types import (
     DetailMarkersWithDetail,
     Document3DAttributeOptions,
     Document3DBoundaryDisplay,
+    Document3DData,
     Document3DPlanConnection,
     Document3DSettings,
     DrawingContentBox,
@@ -175,11 +197,13 @@ from multiconn_archicad.models.tapir.types import (
     Filter3DSettingsUpdate,
     GridSettingsUpdate,
     InteriorElevationData,
+    InteriorElevationWithDetails,
     LayoutData,
     LayoutDatabaseId,
     LayoutSetting,
     LayoutSettingsData,
     LayoutSubsetSettings,
+    LayoutSubsetSettingsChange,
     ModelViewOption,
     ModelViewOptionById,
     ModelViewOptionByName,
@@ -319,6 +343,43 @@ class NavigatorCommands:
         validated_response = ChangeDrawingLinkResult.model_validate(response_dict)
         return validated_response.elements
 
+    def change_layout_subset_settings(
+        self, subsets: list[LayoutSubsetSettingsChange]
+    ) -> list[ChangedLayoutSubset | ErrorItem]:
+        """
+        Changes the settings of existing Layout Book subsets (name, ID prefix, numbering style,
+        start at, ...), the fields of CreateLayoutSubset; the ones not given keep their value.
+        The Archicad API can neither change the settings of a subset nor delete one, so a new
+        subset is created with the changed settings right after the old one, and the old one's
+        layouts and subsets are moved into it in their order; when a move fails, the ones moved
+        before are moved back. The old subset is left empty, and its id is returned with the new
+        one's: delete it in Archicad. These navigator functions are not undoable.
+
+        Args:
+            subsets (list[LayoutSubsetSettingsChange]): The Layout Book subsets to change, each
+                with the settings to change.
+
+        Returns:
+            list[ChangedLayoutSubset | ErrorItem]: One item per input subset, in the same order:
+                the subset that now has the settings and the layouts, and the old subset, left
+                empty, or an error.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "subsets": subsets,
+        }
+        validated_params = ChangeLayoutSubsetSettingsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ChangeLayoutSubsetSettings",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = ChangeLayoutSubsetSettingsResult.model_validate(response_dict)
+        return validated_response.subsets
+
     def clone_project_map_item_to_view_map(
         self, views_data: list[ViewCloneData]
     ) -> list[ErrorItem | NavigatorItemIdArrayItem]:
@@ -347,6 +408,35 @@ class NavigatorCommands:
         )
         validated_response = CloneProjectMapItemToViewMapResult.model_validate(response_dict)
         return validated_response.navigatorItems
+
+    def create_3d_documents(self, documents_data: list[Document3DData]) -> list[CreatedDatabase | ErrorItem]:
+        """
+        Creates 3D Documents with the given names and reference IDs, in the Project Map's 3D
+        Documents folder. Archicad gives each its starting settings; Get3DDocumentSettings reads
+        them and Set3DDocumentSettings changes its view, cut and filter. Returns the databaseId
+        and the Project Map navigatorItemId of each new 3D Document.
+
+        Args:
+            documents_data (list[Document3DData]): One item per new 3D Document.
+
+        Returns:
+            list[CreatedDatabase | ErrorItem]: One item per input item, in the same order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "documentsData": documents_data,
+        }
+        validated_params = Create3DDocumentsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "Create3DDocuments",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = Create3DDocumentsResult.model_validate(response_dict)
+        return validated_response.databases
 
     def create_3d_styles(self, styles: list[Style3DDetails]) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
@@ -411,6 +501,71 @@ class NavigatorCommands:
         )
         validated_response = CreateAddOnViewpointsResult.model_validate(response_dict)
         return validated_response.viewpoints
+
+    def create_camera_sets(self, camera_sets: list[CameraSetData]) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates empty Camera Sets (camera paths) with the given names, and makes one the active
+        Camera Set when isActive is true. Returns their element ids, which GetCameras lists as
+        cameraSetElementId. Delete them with DeleteElements.
+
+        Args:
+            camera_sets (list[CameraSetData]): The Camera Sets (camera paths) to create, each
+                empty: cameras are added to them later.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: The element ids of the new Camera Sets, in the
+                order of the input, or an error for each one that could not be created.
+                GetCameras lists them as cameraSetElementId.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "cameraSets": camera_sets,
+        }
+        validated_params = CreateCameraSetsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateCameraSets",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = CreateCameraSetsResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_cameras(self, cameras: list[CameraData]) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates perspective cameras, each added at the end of the path of the given Camera Set,
+        from the camera and target positions (with their heights) and optionally the view cone,
+        roll angle, two-point perspective, sun (by angles or by date and time) and pen; the rest
+        comes from the Camera tool defaults. Returns their element ids, which GetCameras lists.
+        Delete them with DeleteElements.
+
+        Args:
+            cameras (list[CameraData]): The perspective cameras to create. Each is added at the
+                end of the path of its Camera Set, in the order of this list. The values not
+                given come from the Camera tool defaults.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: The element ids of the new cameras, in the
+                order of the input, or an error for each one that could not be created.
+                GetCameras lists them as cameraElementId.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "cameras": cameras,
+        }
+        validated_params = CreateCamerasParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateCameras",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = CreateCamerasResult.model_validate(response_dict)
+        return validated_response.elements
 
     def create_detail_markers(
         self, detail_markers_data: list[DetailMarkerData]
@@ -859,8 +1014,9 @@ class NavigatorCommands:
 
     def get_3d_cut_planes(self) -> Get3DCutPlanesResult:
         """
-        Gets whether the 3D cut planes are on and the cut planes (pa, pb, pc, pd) of the 3D
-        window, in the form accepted by Set3DCutPlanes.
+        Gets whether the 3D cut planes are on, the cut planes (pa, pb, pc, pd) of the 3D window
+        with the pen and surface of their cut faces, and the custom cut pen and surface, in the
+        form accepted by Set3DCutPlanes.
 
         Returns:
             Get3DCutPlanesResult
@@ -1100,11 +1256,11 @@ class NavigatorCommands:
         """
         Gets the Camera Sets (camera paths) of the project with their name, whether the set is
         the active one, its current camera, and its cameras in path order. Each camera has its
-        element id, whether it is active in the path, and its perspective: camera and target
-        position, distance, azimuth, view cone, roll angle, two-point perspective and sun, in
-        the shape Set3DProjectionSettings accepts, so passing a camera's perspective there shows
-        its view in the 3D window. Archicad cameras are always perspective; they have no name of
-        their own.
+        element id, whether it is active in the path, its pen, and its perspective: camera and
+        target position, distance, azimuth, view cone, roll angle, two-point perspective and
+        sun, in the shape Set3DProjectionSettings accepts, so passing a camera's perspective
+        there shows its view in the 3D window. Archicad cameras are always perspective; they
+        have no name of their own.
 
         Returns:
             list[CameraSet]: The Camera Sets (camera paths) of the project, each with its
@@ -1656,17 +1812,82 @@ class NavigatorCommands:
         validated_response = GetViewSettingsResult.model_validate(response_dict)
         return validated_response.viewSettings
 
+    def modify_camera_sets(
+        self, camera_sets: list[CameraSetModificationData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Renames Camera Sets (camera paths) and makes one of them the active Camera Set (isActive
+        true); the set active before is then no longer active. Values not given are kept.
+
+        Args:
+            camera_sets (list[CameraSetModificationData]): The Camera Sets to change, each with
+                the values to change; the values not given are kept.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each Camera
+                Set of the input, in its order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "cameraSets": camera_sets,
+        }
+        validated_params = ModifyCameraSetsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyCameraSets",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = ModifyCameraSetsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_cameras(
+        self, cameras: list[CameraModificationData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes perspective cameras: the camera and target positions (with their heights), view
+        cone, roll angle, two-point perspective, sun (by angles or by date and time) and pen.
+        Values not given are kept; each camera keeps its element id, its Camera Set and its
+        place in the path. View cone and roll angle are in the units GetCameras returns them.
+
+        Args:
+            cameras (list[CameraModificationData]): The perspective cameras to change, each with
+                the values to change; the values not given are kept. A camera keeps its element
+                id, its Camera Set and its place in the path.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each camera
+                of the input, in its order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "cameras": cameras,
+        }
+        validated_params = ModifyCamerasParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyCameras",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = ModifyCamerasResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def modify_detail_markers(
         self, detail_markers_with_details: list[DetailMarkersWithDetail]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Changes the name, the reference ID, the clip polygon, the boundary's pen and line type,
-        the marker symbol's angle, always-horizontal setting and pen of Detail and Worksheet
-        markers. Not written: the base point (Archicad places it at the center of the clip
-        polygon's bounding box when the marker is created), the viewpoint the marker refers to,
-        and the marker symbol's other settings, which are parameters of the library part placed
-        as the marker (markerId in GetDetailsOfElements). A value Archicad did not apply gets a
-        failed execution result.
+        the marker symbol's angle, always-horizontal setting and pen, and 'Copy construction
+        elements only' of Detail and Worksheet markers. Not written: the base point (Archicad
+        places it at the center of the clip polygon's bounding box when the marker is created),
+        the viewpoint the marker refers to, and the marker symbol's other settings, which are
+        parameters of the library part placed as the marker (markerId in GetDetailsOfElements).
+        A value Archicad did not apply gets a failed execution result.
 
         Args:
             detail_markers_with_details (list[DetailMarkersWithDetail])
@@ -1696,8 +1917,10 @@ class NavigatorCommands:
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Changes the name and the reference ID of Section and Elevation elements, which the
-        Project Map and the markers show. GetDetailsOfElements reads those of a Section back as
-        name and idStr.
+        Project Map and the markers show, and moves their section line (startCoordinate,
+        endCoordinate) and depth line (depth, only with the horizontal range Limited, which
+        SetSectionsAndElevationsDetails sets). GetDetailsOfElements reads them back as name,
+        idStr, startCoordinate, endCoordinate and depth.
 
         Args:
             sections_with_details (list[SectionsWithDetail])
@@ -1767,10 +1990,14 @@ class NavigatorCommands:
         publisher_set_name: str,
         output_path: None | str = None,
         selected_navigator_item_ids: None | list[NavigatorItemIdArrayItem] = None,
-    ) -> None:
+    ) -> PublishPublisherSetResult:
         """
         Performs a publish operation on the currently opened project. Only the given publisher
-        set will be published.
+        set will be published. The command answers when Archicad's API reports the publishing
+        done; for a local or LAN output folder the answer names the folder and lists the files
+        created or changed in it (writtenFiles). A large set can take minutes, so give the call
+        a long enough timeout. The output format of each item is the one set in the publisher
+        set: Archicad's API cannot choose it per call.
 
         Args:
             publisher_set_name (str): The name of the publisher set.
@@ -1778,6 +2005,12 @@ class NavigatorCommands:
                 default the path set in the settings of the publisher set will be used.
             selected_navigator_item_ids (None | list[NavigatorItemIdArrayItem]): Optional
                 publisher-tree navigator items to publish instead of the whole publisher set.
+                Each item wraps its id in navigatorItemId, as the items of GetNavigatorItemTree
+                do: [{"navigatorItemId": {"guid": "6E1C3A9B-0F2D-4B8E-9C7A-1D2E3F405162"}}], not
+                [{"guid": "..."}].
+
+        Returns:
+            PublishPublisherSetResult
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1790,11 +2023,12 @@ class NavigatorCommands:
             "selectedNavigatorItemIds": selected_navigator_item_ids,
         }
         validated_params = PublishPublisherSetParameters(**params_dict)
-        self._core.post_tapir_command(
+        response_dict = self._core.post_tapir_command(
             "PublishPublisherSet",
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
-        return None
+        validated_response = PublishPublisherSetResult.model_validate(response_dict)
+        return validated_response
 
     def rename_navigator_item(
         self,
@@ -1855,7 +2089,8 @@ class NavigatorCommands:
         """
         Reorders the children of a navigator item to match the given order. Works around
         MoveNavigatorItem being unable to reposition an item within its current parent, by
-        bouncing it through a sibling.
+        bouncing it through a sibling folder, or through the parent's own parent when no sibling
+        can host it (for example a folder with only views and clone folders).
 
         Args:
             parent_navigator_item_id (NavigatorItemId): The folder whose children should be
@@ -1912,14 +2147,35 @@ class NavigatorCommands:
         validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
-    def set_3d_cut_planes(self, cut_planes: None | list[CutPlane] = None) -> SuccessfulExecutionResult:
+    def set_3d_cut_planes(
+        self,
+        cut_planes: list[CutPlane],
+        *,
+        use_custom: None | bool = None,
+        custom_pen: None | int = None,
+        custom_surface_id: AttributeId | None = None,
+    ) -> SuccessfulExecutionResult:
         """
-        Sets the 3D cut planes. An empty cutPlanes array switches the 3D cut off.
+        Sets the 3D cut planes (pa*x + pb*y + pc*z = pd, cutting away the side the normal points
+        to), with the pen and surface of their cut faces, and turns 3D Cutaway on. An empty
+        cutPlanes array switches the 3D cut off.
 
         Args:
-            cut_planes (None | list[CutPlane]): The cut planes. An empty array switches the 3D
-                cut off. The side of a plane its normal vector points to is cut away and the
-                other side is kept (to be confirmed in Archicad). pd is in meters.
+            cut_planes (list[CutPlane]): The cut planes, replacing the current ones. Each cuts
+                away the side of its plane that its normal vector (pa, pb, pc) points to;
+                several planes cut away the union of those sides. Setting planes also turns 3D
+                Cutaway on (off and on again when it is on), which puts them in force in the 3D
+                window. An empty array switches the 3D cut off. A plane without cutPen or
+                cutSurfaceId keeps those of the current plane in its place, or of the last
+                current plane; where there is none, or it is pen 0 or no surface (which draws
+                black), it takes customPen and customSurfaceId.
+            use_custom (None | bool): The Custom setting of the cut faces, kept for the 3D
+                Cutting Planes settings; in the Archicad 29 3D window the cut faces take each
+                plane's cutSurfaceId either way. Left unchanged when omitted.
+            custom_pen (None | int): The pen of the cut edges when useCustom is true. Left
+                unchanged when omitted.
+            custom_surface_id (AttributeId | None): The surface of the cut faces when useCustom
+                is true. Left unchanged when omitted.
 
         Returns:
             SuccessfulExecutionResult
@@ -1931,6 +2187,9 @@ class NavigatorCommands:
         """
         params_dict = {
             "cutPlanes": cut_planes,
+            "useCustom": use_custom,
+            "customPen": custom_pen,
+            "customSurfaceId": custom_surface_id,
         }
         validated_params = Set3DCutPlanesParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -2313,6 +2572,41 @@ class NavigatorCommands:
         )
         return None
 
+    def set_interior_elevations_details(
+        self, interior_elevations_with_details: list[InteriorElevationWithDetails]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Sets settings of the given Interior Elevation elements: the stories they are shown on,
+        the common marker's visibility, pen, font and sizes, and for each segment, chosen by its
+        index in GetDetailsOfElements' segments, its name, reference ID and the segment settings
+        of SetSectionsAndElevationsDetails. The element keeps its GUID and its segments keep
+        their viewpoints. A bad segment entry changes nothing on that element, and a change
+        Archicad does not keep (read back after the change) fails the item with the fields it
+        did not apply.
+
+        Args:
+            interior_elevations_with_details (list[InteriorElevationWithDetails])
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "interiorElevationsWithDetails": interior_elevations_with_details,
+        }
+        validated_params = SetInteriorElevationsDetailsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "SetInteriorElevationsDetails",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = SetInteriorElevationsDetailsResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def set_layout_settings(
         self, layouts_data: list[LayoutSettingsData]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
@@ -2440,7 +2734,12 @@ class NavigatorCommands:
         """
         Switches the current plan window to a model view option combination by index, and/or
         changes the given model view options and on-screen view options. With an index, the
-        model view options stored in the combination apply.
+        model view options stored in the combination apply. The options are read back, and a
+        given field Archicad did not keep (with an index, a given on-screen view option) fails
+        the call with the value it kept; the fields Archicad kept stay changed. Archicad 29 does
+        not keep the railing components shown in the floor plan (modelViewOptions.railing,
+        railing2DDisplayComp*) changed this way, so such a change is reported as not kept;
+        GetViewOptions reads them.
 
         Args:
             model_view_option_index (None | int): Switches the window to the model view option
@@ -2533,7 +2832,8 @@ class NavigatorCommands:
         Args:
             zoom_box (Zoom): The area to zoom the current 2D window to, in model coordinates
                 (meters). The window keeps its aspect ratio, so the shown area may be larger
-                than the box. The rotation of the window is kept as it is.
+                than the box. The rotation of the window is kept as it is; in a rotated window
+                the whole box is shown, so the shown area is larger than the box.
 
         Returns:
             SuccessfulExecutionResult

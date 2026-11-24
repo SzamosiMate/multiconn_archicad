@@ -435,7 +435,8 @@ class LibraryCommands:
                 changed.
             parent_id (None | str): The parent subtype of the new library part: its unique ID
                 ('{main}-{revision}') or its main GUID, as GetAvailableLibraryParts reports it.
-                Either parentId or parentName is required.
+                Either parentId or parentName is required. The General GDL Object (the root
+                subtype) cannot be the parent: use the Model Element or one of its subtypes.
             parent_name (None | str): The document name of the parent subtype, e.g. 'General
                 Object' or 'Model Element'; used when parentId is not given.
             folder (None | str): Optional. The folder of the new .gsm file, relative to the
@@ -597,8 +598,9 @@ class LibraryCommands:
         'Window', 'Object', 'Lamp').
 
         Args:
-            filter_by_type_id (LibraryPartType | None): Optional. Filter by libpart type
-                (matches the value returned by LibPartTypeIdToString).
+            filter_by_type_id (LibraryPartType | None): Optional. Only list the library parts of
+                this type, the typeId of the response. 'Pict' and 'Picture' both list the
+                pictures.
 
         Returns:
             GetAvailableLibraryPartsResult
@@ -875,13 +877,18 @@ class LibraryCommands:
         return validated_response.libraryParts
 
     def get_library_part_file_info(
-        self, files: list[str], scripts: None | list[LibraryPartReadableScriptType] = None, password: None | str = None
+        self,
+        files: list[str],
+        scripts: None | list[LibraryPartReadableScriptType] = None,
+        password: None | str = None,
+        include_parameters: None | bool = None,
     ) -> list[ErrorItem | LibraryPartFileInfo]:
         """
         Reads library part files (.gsm) without loading them into the libraries of the project:
-        the unique ID of the part, the unique ID of its subtype and its master, parameter, 2D,
-        3D and properties scripts. Password protected parts need their password. Available from
-        Archicad 28.
+        the unique ID of the part, the unique ID of its subtype, its master, parameter, 2D, 3D
+        and properties scripts, and, with includeParameters, its parameters with their default
+        values and descriptions (in the format of GetLibraryPartParameterValues). Password
+        protected parts need their password. Available from Archicad 28.
 
         Args:
             files (list[str]): The absolute paths of the library part files (.gsm) to read. The
@@ -890,6 +897,10 @@ class LibraryCommands:
                 by default.
             password (None | str): The password of password protected library parts. Reading a
                 script of a protected part without the right password is an error for that file.
+            include_parameters (None | bool): Also returns the parameters of each file with
+                their default values and descriptions, in the format of
+                GetLibraryPartParameterValues. Default is false, so a caller that only wants the
+                scripts gets them even when the parameters of a file cannot be read.
 
         Returns:
             list[ErrorItem | LibraryPartFileInfo]: The information of the files in the order of
@@ -904,6 +915,7 @@ class LibraryCommands:
             "files": files,
             "scripts": scripts,
             "password": password,
+            "includeParameters": include_parameters,
         }
         validated_params = GetLibraryPartFileInfoParameters(**params_dict)
         response_dict = self._core.post_tapir_command(
@@ -1602,8 +1614,10 @@ class LibraryCommands:
     ) -> SuccessfulExecutionResult:
         """
         Creates, replaces or deletes a custom section of a loaded library part. The content is
-        given as base64. A library part that is not editable is refused and left unchanged.
-        Available from Archicad 28.
+        given as base64. A library part that is not editable is refused and left unchanged. A
+        part of the embedded library that Archicad does not report editable, as in a saved
+        project, is changed in a temporary copy that then replaces it, keeping its main GUID,
+        and the libraries are reloaded. Available from Archicad 28.
 
         Args:
             name (str): The name of the loaded library part file with its extension, as returned
@@ -1650,8 +1664,10 @@ class LibraryCommands:
         Sets the author, keywords, license, license version, password and the placeable, UI
         default, subtype and hierarchical pages flags of loaded library parts. Only the given
         fields are changed. A library part that is not editable (e.g. a part of a library
-        package or a read-only library) is refused and left unchanged. Available from Archicad
-        28.
+        package or a read-only library) is refused and left unchanged. A part of the embedded
+        library that Archicad does not report editable, as in a saved project, is changed in a
+        temporary copy that then replaces it, keeping its main GUID, and the libraries are
+        reloaded. Available from Archicad 28.
 
         Args:
             library_parts (list[LibraryPartMetadataUpdate]): The library parts to modify and the
@@ -1685,7 +1701,9 @@ class LibraryCommands:
         parts, in the format of SetGDLParametersOfElements. Only the given parameters are
         changed; with merge, the changed list is merged into the parameters of the part instead
         of replacing them. A library part that is not editable, or with an invalid value given,
-        is left unchanged. Available from Archicad 28.
+        is left unchanged. A part of the embedded library that Archicad does not report
+        editable, as in a saved project, is changed in a temporary copy that then replaces it,
+        keeping its main GUID, and the libraries are reloaded. Available from Archicad 28.
 
         Args:
             library_parts (list[LibraryPartParametersUpdate]): The library parts to modify and
@@ -1723,7 +1741,10 @@ class LibraryCommands:
         Sets the preview picture and the GDL pictures of a loaded library part from base64
         encoded PNGs, and from Archicad 29 also their dark user interface variants. All pictures
         are set in one step; an invalid picture changes nothing. A library part that is not
-        editable is refused and left unchanged. Available from Archicad 28.
+        editable is refused and left unchanged. A part of the embedded library that Archicad
+        does not report editable, as in a saved project, is changed in a temporary copy that
+        then replaces it, keeping its main GUID, and the libraries are reloaded. Available from
+        Archicad 28.
 
         Args:
             name (str): The name of the loaded library part file with its extension, as returned
@@ -1774,8 +1795,10 @@ class LibraryCommands:
         """
         Deletes the preview picture, the GDL pictures (and from Archicad 29 their dark variants)
         or the 2D symbol of a loaded library part, or copies the 2D symbol from another library
-        part. A library part that is not editable is refused and left unchanged. Available from
-        Archicad 28.
+        part. A library part that is not editable is refused and left unchanged. A part of the
+        embedded library that Archicad does not report editable, as in a saved project, is
+        changed in a temporary copy that then replaces it, keeping its main GUID, and the
+        libraries are reloaded. Available from Archicad 28.
 
         Args:
             name (str): The name of the loaded library part file with its extension, as returned
@@ -1827,7 +1850,9 @@ class LibraryCommands:
         backward migration scripts of loaded library parts. Only the given scripts are changed;
         an empty script makes the section empty, deleteScripts removes it. A library part that
         is not editable (e.g. a part of a library package or a read-only library) is refused and
-        left unchanged. Available from Archicad 28.
+        left unchanged. A part of the embedded library that Archicad does not report editable,
+        as in a saved project, is changed in a temporary copy that then replaces it, keeping its
+        main GUID, and the libraries are reloaded. Available from Archicad 28.
 
         Args:
             library_parts (list[LibraryPartScriptDataWithDeletions |

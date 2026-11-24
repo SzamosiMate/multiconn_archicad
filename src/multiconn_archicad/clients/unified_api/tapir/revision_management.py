@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    CreateChangeMarkersParameters,
+    CreateChangeMarkersResult,
     GetCurrentRevisionChangesOfLayoutsParameters,
     GetCurrentRevisionChangesOfLayoutsResult,
     GetDocumentRevisionsResult,
@@ -14,10 +16,14 @@ from multiconn_archicad.models.tapir.commands import (
     GetRevisionChangesOfElementsResult,
     GetRevisionChangesResult,
     GetRevisionIssuesResult,
+    ModifyChangeMarkersParameters,
+    ModifyChangeMarkersResult,
     ModifyRevisionIssuesParameters,
     ModifyRevisionIssuesResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    ChangeMarkerData,
+    ChangeMarkerWithDetails,
     DatabaseIdArrayItem,
     DocumentRevision,
     ElementIdArrayItem,
@@ -37,6 +43,42 @@ if TYPE_CHECKING:
 class RevisionManagementCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def create_change_markers(
+        self, change_markers_data: list[ChangeMarkerData]
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates Change Markers (revision clouds) in the database of the active window, each with
+        a cloud polygon, its marker components, the position it points to and the position of
+        its marker head. A marker can be linked to an existing Change by its ID, or create a new
+        Change with an ID and a description (createChange): the Archicad API creates Changes
+        only this way. The marker head uses the Change Marker tool defaults, with the angle and
+        always-horizontal setting given (angle, horizontalMarker). ModifyChangeMarkers takes the
+        same settings. GetDetailsOfElements reads the markers back.
+
+        Args:
+            change_markers_data (list[ChangeMarkerData]): The Change Markers to create, in the
+                database of the active window (the floor plan story, a section, a detail, a
+                worksheet or a layout).
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "changeMarkersData": change_markers_data,
+        }
+        validated_params = CreateChangeMarkersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateChangeMarkers",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = CreateChangeMarkersResult.model_validate(response_dict)
+        return validated_response.elements
 
     def get_current_revision_changes_of_layouts(
         self, layout_database_ids: list[DatabaseIdArrayItem]
@@ -163,6 +205,48 @@ class RevisionManagementCommands:
         response_dict = self._core.post_tapir_command("GetRevisionIssues")
         validated_response = GetRevisionIssuesResult.model_validate(response_dict)
         return validated_response
+
+    def modify_change_markers(
+        self, change_markers_with_details: list[ChangeMarkerWithDetails]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes existing Change Markers (revision clouds) with the keys CreateChangeMarkers
+        takes and GetDetailsOfElements returns: the Change the marker is linked to (an existing
+        Change by its ID, a new Change made with createChange, or no Change with linkType
+        Unlinked), the marker components, the angle and always-horizontal setting of the marker
+        head, the position of the marker head (markerPosition), and the point a marker without a
+        cloud polygon points to (position). Only the given settings are changed. The cloud
+        polygon cannot be changed, as Archicad keeps it: delete the marker and create it again.
+        The marker is read back, so a value Archicad did not keep is reported as a failure.
+
+        Args:
+            change_markers_with_details (list[ChangeMarkerWithDetails]): The Change Markers to
+                change, in the database of the active window, each with the settings to change.
+                Only the given settings are changed; the keys are those CreateChangeMarkers
+                takes and GetDetailsOfElements returns. The cloud polygon cannot be changed:
+                besides the settings, ACAPI_Element_Change only changes the position of a marker
+                without a polygon, so delete the marker and create it again with
+                CreateChangeMarkers for a new polygon.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: A list of execution
+                results.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "changeMarkersWithDetails": change_markers_with_details,
+        }
+        validated_params = ModifyChangeMarkersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyChangeMarkers",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = ModifyChangeMarkersResult.model_validate(response_dict)
+        return validated_response.executionResults
 
     def modify_revision_issues(
         self, revision_issues: list[RevisionIssueModificationData]

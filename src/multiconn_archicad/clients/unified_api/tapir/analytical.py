@@ -34,7 +34,9 @@ from multiconn_archicad.models.tapir.commands import (
     GetAnalyticalLinksResult,
     GetAnalyticalLoadCasesParameters,
     GetAnalyticalLoadCasesResult,
+    GetAnalyticalLoadCombinationsParameters,
     GetAnalyticalLoadCombinationsResult,
+    GetAnalyticalLoadGroupsParameters,
     GetAnalyticalLoadGroupsResult,
     GetAnalyticalLoadsParameters,
     GetAnalyticalLoadsResult,
@@ -571,38 +573,69 @@ class AnalyticalCommands:
         validated_response = GetAnalyticalLoadCasesResult.model_validate(response_dict)
         return validated_response.loadCases
 
-    def get_analytical_load_combinations(self) -> list[AnalyticalLoadCombination | ErrorItem]:
+    def get_analytical_load_combinations(
+        self, *, load_combination_ids: None | list[AnalyticalLoadCombinationIdArrayItem] = None
+    ) -> list[AnalyticalLoadCombination | ErrorItem]:
         """
-        Retrieves the structural analysis load combinations of the project with all their fields
-        and load factors.
+        Retrieves the structural analysis load combinations of the project, or the ones given by
+        their ids, with all their fields and load factors.
+
+        Args:
+            load_combination_ids (None | list[AnalyticalLoadCombinationIdArrayItem]): The load
+                combinations to read, answered in this order, an error object for one that does
+                not exist. Every load combination of the project is listed when it is omitted.
 
         Returns:
-            list[AnalyticalLoadCombination | ErrorItem]: The load combinations of the project. A
-                load combination that cannot be read is represented by an error object.
+            list[AnalyticalLoadCombination | ErrorItem]: The load combinations of the project,
+                or the ones given in loadCombinationIds. A load combination that cannot be read
+                is represented by an error object.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
-        response_dict = self._core.post_tapir_command("GetAnalyticalLoadCombinations")
+        params_dict = {
+            "loadCombinationIds": load_combination_ids,
+        }
+        validated_params = GetAnalyticalLoadCombinationsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAnalyticalLoadCombinations",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
         validated_response = GetAnalyticalLoadCombinationsResult.model_validate(response_dict)
         return validated_response.loadCombinations
 
-    def get_analytical_load_groups(self) -> list[AnalyticalLoadGroup | ErrorItem]:
+    def get_analytical_load_groups(
+        self, *, load_group_ids: None | list[AnalyticalLoadGroupIdArrayItem] = None
+    ) -> list[AnalyticalLoadGroup | ErrorItem]:
         """
-        Retrieves the structural analysis load groups of the project with all their fields.
+        Retrieves the structural analysis load groups of the project, or the ones given by their
+        ids, with all their fields.
+
+        Args:
+            load_group_ids (None | list[AnalyticalLoadGroupIdArrayItem]): The load groups to
+                read, answered in this order, an error object for one that does not exist. Every
+                load group of the project is listed when it is omitted.
 
         Returns:
-            list[AnalyticalLoadGroup | ErrorItem]: The load groups of the project. A load group
-                that cannot be read is represented by an error object.
+            list[AnalyticalLoadGroup | ErrorItem]: The load groups of the project, or the ones
+                given in loadGroupIds. A load group that cannot be read is represented by an
+                error object.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
             RequestError: If there is a network or connection error.
             pydantic.ValidationError: If the parameters, or the API Response fail validation.
         """
-        response_dict = self._core.post_tapir_command("GetAnalyticalLoadGroups")
+        params_dict = {
+            "loadGroupIds": load_group_ids,
+        }
+        validated_params = GetAnalyticalLoadGroupsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetAnalyticalLoadGroups",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
         validated_response = GetAnalyticalLoadGroupsResult.model_validate(response_dict)
         return validated_response.loadGroups
 
@@ -736,15 +769,19 @@ class AnalyticalCommands:
     ) -> list[AnalyticalMemberTypeResult | ErrorItem]:
         """
         Retrieves the analytical member type (Beam, Column, Roof, Slab, Wall or Unknown) of the
-        given elements.
+        given elements from the Complementary Project, the structural analysis project exchanged
+        with Archicad. Without a Complementary Project every element reads Unknown. An element
+        that does not exist gets an error item.
 
         Args:
             elements (list[ElementIdArrayItem]): A list of elements.
 
         Returns:
             list[AnalyticalMemberTypeResult | ErrorItem]: The analytical member type of each
-                element, in the order of the input. An element the type cannot be got for is
-                represented by an error object.
+                element, in the order of the input, as the Complementary Project (the structural
+                analysis project exchanged with Archicad) gives it: Unknown for every element
+                when the project has none. An element that does not exist, or whose type cannot
+                be got, is represented by an error object.
 
         Raises:
             ArchicadAPIError: If the API returns an error response.
@@ -1087,7 +1124,8 @@ class AnalyticalCommands:
     ) -> SuccessfulExecutionResult:
         """
         Changes the given fields of the Structural Analytical Model visibility settings; the
-        others keep their value. Available from Archicad 26.
+        others keep their value. The settings are read back, and a given field Archicad did not
+        keep is reported as an error with the value it kept. Available from Archicad 26.
 
         Args:
             visibility_settings (AnalyticalVisibilitySettings): The fields to change. The fields

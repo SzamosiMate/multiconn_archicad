@@ -41,6 +41,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetPropertyValuesOfElementDefaultsResult,
     GetPropertyValuesOfElementsParameters,
     GetPropertyValuesOfElementsResult,
+    GetTypedPropertyValuesOfElementsParameters,
+    GetTypedPropertyValuesOfElementsResult,
     ImportPropertiesXmlParameters,
     ImportPropertiesXmlResult,
     MakePropertyAvailableForElementsParameters,
@@ -78,8 +80,7 @@ from multiconn_archicad.models.tapir.types import (
     ElementComponentsArrayItem,
     ElementDefaultPropertyValue,
     ElementIdArrayItem,
-    ElementPropertyValueWithStatus,
-    ElementPropertyValueWithValue,
+    ElementPropertyValue,
     ElementType,
     ErrorItem,
     ExecutionResult,
@@ -106,6 +107,7 @@ from multiconn_archicad.models.tapir.types import (
     SuccessfulExecutionResult,
     ToolDefaultProperties,
     ToolDefaultPropertyFilter,
+    TypedPropertyValuesForElement,
     ValueType,
 )
 
@@ -819,6 +821,46 @@ class PropertyCommands:
         validated_response = GetPropertyValuesOfElementsResult.model_validate(response_dict)
         return validated_response.propertyValuesForElements
 
+    def get_typed_property_values_of_elements(
+        self, elements: list[ElementIdArrayItem], properties: list[PropertyIdArrayItem]
+    ) -> list[ErrorItem | TypedPropertyValuesForElement]:
+        """
+        Returns the property values of the elements in JSON's own types instead of display text:
+        numbers, integers, booleans, strings, lists of them, and the chosen options of an option
+        set as their identifiers (a list for a multiple choice). Each value comes with its type
+        (number, length, area, volume, angle, integer, string, boolean, their lists, singleEnum,
+        multiEnum), its status (normal, userUndefined or notAvailable) and isDefault, in the
+        PropertyValueDetails shape of Graphisoft's API. Measured values are in SI units (meters,
+        square meters, cubic meters, radians) whatever the project's working units and language,
+        and an option is named by its nonLocalizedValue when it has one. A property that is not
+        found, cannot be evaluated for the element or has a Guid value gets an error item.
+
+        Args:
+            elements (list[ElementIdArrayItem]): A list of elements.
+            properties (list[PropertyIdArrayItem]): A list of property identifiers.
+
+        Returns:
+            list[ErrorItem | TypedPropertyValuesForElement]: One item per given element, in
+                their order: the values of the element's properties, or an error for an element
+                that was not found.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elements": elements,
+            "properties": properties,
+        }
+        validated_params = GetTypedPropertyValuesOfElementsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "GetTypedPropertyValuesOfElements",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = GetTypedPropertyValuesOfElementsResult.model_validate(response_dict)
+        return validated_response.propertyValuesForElements
+
     def import_properties_xml(
         self, xml: str, conflict_policy: PropertyImportConflictPolicy
     ) -> ImportPropertiesXmlResult:
@@ -1206,7 +1248,7 @@ class PropertyCommands:
         return validated_response.executionResults
 
     def set_property_values_of_elements(
-        self, element_property_values: list[ElementPropertyValueWithStatus | ElementPropertyValueWithValue]
+        self, element_property_values: list[ElementPropertyValue]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Sets the property values of elements. It works for subelements of hierarchal elements
@@ -1218,14 +1260,13 @@ class PropertyCommands:
         GetPropertyValuesOfElements gives them.
 
         Args:
-            element_property_values (list[ElementPropertyValueWithStatus |
-                ElementPropertyValueWithValue]): A single real value accepts '.' or ',' as the
-                decimal separator, so the value strings GetPropertyValuesOfElements returns can
-                be written back: when both appear the last one is the decimal separator, a
-                separator that appears more than once groups thousands, and a single separator
-                is the decimal one. Unitless real and integer lists accept semicolon-separated
-                numbers; an empty string sets an empty list. Invalid items reject the entire
-                property write.
+            element_property_values (list[ElementPropertyValue]): A single real value accepts
+                '.' or ',' as the decimal separator, so the value strings
+                GetPropertyValuesOfElements returns can be written back: when both appear the
+                last one is the decimal separator, a separator that appears more than once
+                groups thousands, and a single separator is the decimal one. Unitless real and
+                integer lists accept semicolon-separated numbers; an empty string sets an empty
+                list. Invalid items reject the entire property write.
 
         Returns:
             list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each item of
@@ -1254,7 +1295,7 @@ class PropertyCommands:
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
     def set_property_values_of_elements_dry_run(
-        self, element_property_values: list[ElementPropertyValueWithStatus | ElementPropertyValueWithValue]
+        self, element_property_values: list[ElementPropertyValue]
     ) -> SetPropertyValuesOfElementsResult:
         """
         Preview this command without applying its changes. Sets the property values of elements.
@@ -1266,14 +1307,13 @@ class PropertyCommands:
         real run would write (newValue), both as GetPropertyValuesOfElements gives them.
 
         Args:
-            element_property_values (list[ElementPropertyValueWithStatus |
-                ElementPropertyValueWithValue]): A single real value accepts '.' or ',' as the
-                decimal separator, so the value strings GetPropertyValuesOfElements returns can
-                be written back: when both appear the last one is the decimal separator, a
-                separator that appears more than once groups thousands, and a single separator
-                is the decimal one. Unitless real and integer lists accept semicolon-separated
-                numbers; an empty string sets an empty list. Invalid items reject the entire
-                property write.
+            element_property_values (list[ElementPropertyValue]): A single real value accepts
+                '.' or ',' as the decimal separator, so the value strings
+                GetPropertyValuesOfElements returns can be written back: when both appear the
+                last one is the decimal separator, a separator that appears more than once
+                groups thousands, and a single separator is the decimal one. Unitless real and
+                integer lists accept semicolon-separated numbers; an empty string sets an empty
+                list. Invalid items reject the entire property write.
 
         Returns:
             SetPropertyValuesOfElementsResult

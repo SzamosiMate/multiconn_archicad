@@ -6,6 +6,8 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter
 
 from multiconn_archicad.models.tapir.commands import (
+    CreateAngleDimensionsParameters,
+    CreateAngleDimensionsResult,
     CreateArcsParameters,
     CreateArcsResult,
     CreateAssociativeDimensionsOnSectionParameters,
@@ -44,8 +46,12 @@ from multiconn_archicad.models.tapir.commands import (
     CreateObjectsResult,
     CreateOpeningsParameters,
     CreateOpeningsResult,
+    CreatePicturesParameters,
+    CreatePicturesResult,
     CreatePolylinesParameters,
     CreatePolylinesResult,
+    CreateRadialDimensionsParameters,
+    CreateRadialDimensionsResult,
     CreateRailingsFromPolylineParameters,
     CreateRailingsFromPolylineResult,
     CreateRailingsParameters,
@@ -74,6 +80,7 @@ from multiconn_archicad.models.tapir.commands import (
     CreateZonesResult,
 )
 from multiconn_archicad.models.tapir.types import (
+    AngleDimensionData,
     ArcData,
     AssociativeDimensionData,
     AssociativeDimensionOnSectionData,
@@ -96,7 +103,9 @@ from multiconn_archicad.models.tapir.types import (
     MorphData,
     ObjectData,
     OpeningData,
+    PictureData,
     PolylineData,
+    RadialDimensionData,
     RailingData,
     RailingFromPolylineData,
     RoofData,
@@ -120,6 +129,50 @@ if TYPE_CHECKING:
 class ElementCreationCommands:
     def __init__(self, core: CoreCommands):
         self._core = core
+
+    def create_angle_dimensions(
+        self, angle_dimensions_data: list[AngleDimensionData], database_id: DatabaseId | None = None
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates Angle Dimension elements (the Angle Dimension tool) measuring the angle between
+        two lines, each given by two points, with the dimension arc through the given
+        arcPosition, optionally based on an Angle Dimension favorite. The dimensions are static
+        (not associated with elements) and are created in the current database - the floor plan,
+        or the section, elevation, interior elevation, worksheet or detail whose window is
+        active - or in the one given by databaseId. GetDetailsOfElements returns their lines,
+        arc and measured angle.
+
+        Args:
+            angle_dimensions_data (list[AngleDimensionData]): Array of data to create Angle
+                Dimensions (the Angle Dimension tool). They are created in the current database
+                (the floor plan, or the section, elevation, interior elevation, worksheet or
+                detail whose window is active), or in the one given by databaseId.
+            database_id (DatabaseId | None): Optional database to create the elements in, e.g. a
+                section, an elevation, a worksheet or a detail (see GetDatabases). The front
+                window stays as it is: a worksheet or detail whose window was never opened is
+                opened once on Archicad 27 and later, and the front window is brought back.
+                Without it the elements are created in the current database. If Archicad cannot
+                switch to it, nothing is created and the call fails.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "angleDimensionsData": angle_dimensions_data,
+            "databaseId": database_id,
+        }
+        validated_params = CreateAngleDimensionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateAngleDimensions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = CreateAngleDimensionsResult.model_validate(response_dict)
+        return validated_response.elements
 
     def create_arcs(
         self, arcs_data: list[ArcData], *, database_id: DatabaseId | None = None
@@ -222,11 +275,12 @@ class ElementCreationCommands:
 
     def create_beams(self, beams_data: list[BeamData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates Beam elements based on the given parameters. Takes the same cut fill pens and
-        cover fill as ModifyBeams, besides the position, shape, slant and cross section;
-        settings not given come from the Beam tool defaults or the favorite. Not written by
-        either command: the surfaces of the beam segments, and the cut fill pens before Archicad
-        27.
+        Creates Beam elements based on the given parameters. Takes the same cut fill pens, cover
+        fill and holes as ModifyBeams, besides the position, shape, slant and cross section;
+        settings not given come from the Beam tool defaults or the favorite. Both commands take
+        the same segments array, which sets the cross section, taper and length of single
+        segments. Not written by either command: the surfaces of the beam segments, and the cut
+        fill pens before Archicad 27.
 
         Args:
             beams_data (list[BeamData])
@@ -289,10 +343,10 @@ class ElementCreationCommands:
     def create_columns(self, columns_data: list[ColumnData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Column elements based on the given parameters. Takes the same cut fill pens and
-        cover fill as ModifyColumns, besides the position, size, slant, cross section and
-        veneer; settings not given come from the Column tool defaults or the favorite. Not
-        written by either command: the surfaces of the column segments, and the cut fill pens
-        before Archicad 27.
+        cover fill as ModifyColumns, besides the position, size, top link (relativeTopStory,
+        topOffset), slant, cross section and veneer; settings not given come from the Column
+        tool defaults or the favorite. ModifyColumns writes single column segments (its segments
+        list). Not written by either command: the cut fill pens before Archicad 27.
 
         Args:
             columns_data (list[ColumnData]): Array of data to create Columns.
@@ -402,10 +456,15 @@ class ElementCreationCommands:
     ) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Hatch elements based on the given parameters. A hatch can have holes, in the
-        same format SetDetailsOfElements accepts for hatches.
+        same format SetDetailsOfElements accepts for hatches, and takes its fill orientation,
+        fill category (drafting, cut or cover), contour pen and line type, background (a pen,
+        transparent or the window background) and the percentage it subtracts from the zone area
+        in the same call.
 
         Args:
-            hatches_data (list[HatchData]): Array of data to create Hatches.
+            hatches_data (list[HatchData]): Array of data to create Hatches. The settings left
+                out come from the Fill tool defaults, or from the favorite given by
+                favoriteName.
             database_id (DatabaseId | None): Optional database to create the elements in, e.g. a
                 worksheet, a detail or a layout (see GetDatabases, or the databaseId
                 CreateWorksheets and CreateDetails return). The front window stays as it is: a
@@ -474,7 +533,9 @@ class ElementCreationCommands:
         self, labels_data: list[LabelData], *, database_id: DatabaseId | None = None
     ) -> list[ElementIdArrayItem | ErrorItem]:
         """
-        Creates Label elements based on the given parameters.
+        Creates Label elements based on the given parameters, optionally on a given layer. A
+        Symbol label can name its label library part in libraryPartName; it starts from the
+        Symbol label settings of the Label tool default or of the favorite in favoriteName.
 
         Args:
             labels_data (list[LabelData]): Array of data to create Labels.
@@ -734,6 +795,48 @@ class ElementCreationCommands:
         validated_response = CreateOpeningsResult.model_validate(response_dict)
         return validated_response.elements
 
+    def create_pictures(
+        self, pictures_data: list[PictureData], database_id: DatabaseId | None = None
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates Picture elements from PNG, JPEG, GIF, TIFF or BMP images, given as a file path
+        or as base64 text, at an exact size in model units: give the width, the height or both
+        (one of them keeps the image's proportions). The image is placed by its anchor point at
+        position, and can be rotated, mirrored and drawn with transparent white pixels. With
+        databaseId the pictures are placed in that database, e.g. a worksheet, a detail or a
+        layout, instead of the current one. GetDetailsOfElements reads the settings of a placed
+        picture.
+
+        Args:
+            pictures_data (list[PictureData]): Array of data to create Pictures.
+            database_id (DatabaseId | None): Optional database to create the pictures in, e.g. a
+                worksheet, a detail or a layout (see GetDatabases, or the databaseId
+                CreateWorksheets and CreateDetails return). The front window stays as it is: a
+                worksheet or detail whose window was never opened is opened once on Archicad 27
+                and later, and the front window is brought back. Without it the pictures are
+                created in the current database. If Archicad cannot switch to it, nothing is
+                created and the call fails.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "picturesData": pictures_data,
+            "databaseId": database_id,
+        }
+        validated_params = CreatePicturesParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreatePictures",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = CreatePicturesResult.model_validate(response_dict)
+        return validated_response.elements
+
     def create_polylines(
         self, polylines_data: list[PolylineData], *, database_id: DatabaseId | None = None
     ) -> list[ElementIdArrayItem | ErrorItem]:
@@ -741,7 +844,9 @@ class ElementCreationCommands:
         Creates Polyline elements based on the given parameters.
 
         Args:
-            polylines_data (list[PolylineData]): Array of data to create Polylines.
+            polylines_data (list[PolylineData]): Array of data to create Polylines. The settings
+                left out come from the Polyline tool defaults, or from the favorite given by
+                favoriteName.
             database_id (DatabaseId | None): Optional database to create the elements in, e.g. a
                 worksheet, a detail or a layout (see GetDatabases, or the databaseId
                 CreateWorksheets and CreateDetails return). The front window stays as it is: a
@@ -768,6 +873,59 @@ class ElementCreationCommands:
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = CreatePolylinesResult.model_validate(response_dict)
+        return validated_response.elements
+
+    def create_radial_dimensions(
+        self, radial_dimensions_data: list[RadialDimensionData], database_id: DatabaseId | None = None
+    ) -> list[ElementIdArrayItem | ErrorItem]:
+        """
+        Creates Radial Dimension elements (the Radial Dimension tool) measuring the radius of an
+        arc, a circle or a curved wall, linked to that element, with the dimension line ending
+        at dimensionLineEnd, optionally based on a Radial Dimension favorite, with the line pen,
+        marker, text height, pen, position and direction, a custom text and the centre mark. The
+        Archicad API does not document how a radial dimension stores the measured element, so
+        the link is written as GetDetailsOfElements reads it from dimensions placed by hand
+        (ownerElementInIndex and ownerElementLine can be given), and each new dimension is read
+        back: one Archicad did not link to the element, whose radius is not the element's, whose
+        dimension line Archicad moved off the given direction (it may lengthen the line so that
+        the text fits) or that did not keep a given setting fails with the values Archicad
+        stored and is deleted again. Archicad stores the link to a circle with the type Arc, and
+        to a curved wall with ownerElementInIndex -1, as for a dimension placed by hand. Tested
+        on Archicad 29 with circles, arcs and curved walls. The dimensions are created in the
+        current database or in the one given by databaseId; GetDetailsOfElements returns their
+        radius, base point and owner element.
+
+        Args:
+            radial_dimensions_data (list[RadialDimensionData]): Array of data to create Radial
+                Dimensions (the Radial Dimension tool), each measuring the radius of an arc, a
+                circle or a curved wall. They are created in the current database (the floor
+                plan, or the worksheet or detail whose window is active), or in the one given by
+                databaseId, which must hold the measured element.
+            database_id (DatabaseId | None): Optional database to create the elements in, e.g. a
+                worksheet or a detail (see GetDatabases), which must hold the measured elements.
+                The front window stays as it is: a worksheet or detail whose window was never
+                opened is opened once on Archicad 27 and later, and the front window is brought
+                back. Without it the elements are created in the current database. If Archicad
+                cannot switch to it, nothing is created and the call fails.
+
+        Returns:
+            list[ElementIdArrayItem | ErrorItem]: A list of element identifiers or errors.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "radialDimensionsData": radial_dimensions_data,
+            "databaseId": database_id,
+        }
+        validated_params = CreateRadialDimensionsParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "CreateRadialDimensions",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = CreateRadialDimensionsResult.model_validate(response_dict)
         return validated_response.elements
 
     def create_railings(self, railings_data: list[RailingData]) -> list[ElementIdArrayItem | ErrorItem]:
@@ -833,7 +991,9 @@ class ElementCreationCommands:
         """
         Creates Roof elements based on footprint, level and roof profile data. Creates a multi-
         plane roof by default; pass 'pivotLine' (and optionally 'angle') to create a single-
-        plane roof instead.
+        plane roof instead. Each item may give a layer (layerIndex) and an Element ID (id), and
+        a multi-plane roof the planes of its edges (pivotEdges, e.g. gables), as ModifyRoofs
+        takes them.
 
         Args:
             roofs_data (list[RoofData])
@@ -918,11 +1078,14 @@ class ElementCreationCommands:
     def create_slabs(self, slabs_data: list[SlabData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Slab elements based on the given parameters. Takes the same surfaces (top, side,
-        bottom), cut fill pens and floor fill as ModifySlabs, besides the outline, holes, level
-        and structure; settings not given come from the Slab tool defaults or the favorite. Not
-        written by either command: the surface of a single edge, and the cut fill pens before
-        Archicad 27; of the floor fill orientation Archicad applies only the type through the
-        API.
+        bottom), cut fill pens, floor fill and floor plan and section display (contour, section
+        contour and hidden contour pens and line types, the story visibility of the contour and
+        the fill, materialsChained, linkToSettings) as ModifySlabs, besides the outline, holes,
+        level and structure; settings not given come from the Slab tool defaults or the
+        favorite. The Edge Angle and the surface of single edges are written afterwards with
+        ModifySlabs (edgeTrim, edgeTrims, edgeSideMaterials). Not written by either command: the
+        cut fill pens before Archicad 27; of the floor fill orientation Archicad applies only
+        the type through the API.
 
         Args:
             slabs_data (list[SlabData]): Array of data to create Slabs.
@@ -988,10 +1151,20 @@ class ElementCreationCommands:
         """
         Creates Stair elements based on the given baseline and parameters, optionally with the
         segment type of each baseline edge and the turn at each baseline point (landings and
-        winders). Accepts the same settings as ModifyStairs: the step values with their locks,
-        the finish and structure visibility, the extra treads, the walking line, the numbering,
-        the walking direction, and the tread, riser and structure settings of the flights and
-        the landings; settings not given come from the Stair tool defaults or the favorite.
+        winders), and with curved baseline edges (baseLineArcs) for curved and spiral stairs.
+        Accepts the same settings as ModifyStairs: the step values with their locks, the top
+        link (relativeTopStory, topOffset), the Rules and Standards, the headroom, the finish
+        and structure visibility, the extra treads, the walking line, the numbering, the walking
+        direction, and the tread, riser and structure settings of the flights and the landings
+        (with the monolith data of a Monolith structure and the stringer data of a Side one),
+        and the floor plan and reflected ceiling plan display (shown stories and components, the
+        symbol on each story, the break line and the line type, pen and fill overrides), and the
+        line types, pens and fills of the structure symbols (structureSymbols,
+        monolithStructureSymbols) with their visibility on the stories
+        (structureVisibilityOnStories); settings not given come from the Stair tool defaults or
+        the favorite. Archicad lays out the boundaries and the walking lines from the baseline
+        and the flight width, and the API cannot write them: an item that gives one is refused
+        with an error that says so.
 
         Args:
             stairs_data (list[StairData]): Array of data to create Stair elements.
@@ -1083,11 +1256,13 @@ class ElementCreationCommands:
     def create_walls(self, walls_data: list[WallData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Wall elements based on the given parameters. Takes the same wall settings as
-        ModifyWalls, applied by the same code, except geometryType and profileType, which the
-        new wall takes from the favorite or the Wall tool defaults (its plan outline is always
-        Straight), and bottomOffset, which comes from zCoordinate. Neither command can write a
-        Polygonal outline (it needs an outline polygon, which these commands do not take),
-        connectionPriority or junctionSequence (Archicad ignores writes to them;
+        ModifyWalls, applied by the same code, including geometryType (Straight or Trapezoid,
+        with begThickness and endThickness), profileType (Normal, Slanted or Trapez) and the
+        slant angles, so a trapezoid or slanted wall is made in one call; only bottomOffset
+        differs, which comes from zCoordinate. A slantAlpha or slantBeta that the wall's
+        profileType cannot take fails the item instead of being dropped. Neither command can
+        write a Polygonal outline (it needs an outline polygon, which these commands do not
+        take), connectionPriority or junctionSequence (Archicad ignores writes to them;
         GetDetailsOfElements reads them), and on Archicad 29 any story visibility other than
         'Home story only' and 'All relevant stories'.
 
@@ -1142,11 +1317,12 @@ class ElementCreationCommands:
     def create_zones(self, zones_data: list[ZoneData]) -> list[ElementIdArrayItem | ErrorItem]:
         """
         Creates Zone elements based on the given parameters. Takes the same zone settings as
-        ModifyZones (name, number, category, zone stamp, levels, contour line and cover fill),
-        applied by the same helpers; the polygon or reference point is only set here. An item
-        whose area would overlap an existing Zone on the same story fails with an error naming
-        that Zone instead of opening Archicad's modal overlap warning, unless its allowOverlap
-        is true.
+        ModifyZones (name, number, category, zone stamp, stamp pen, levels, letter size
+        (roomLSize, in millimetres), contour line, cover fill, 3D surface, polygon display and
+        area reduction), applied by the same helpers; the polygon or reference point, and the
+        layer (layerIndex), are only set here. An item whose area would overlap an existing Zone
+        on the same story fails with an error naming that Zone instead of opening Archicad's
+        modal overlap warning, unless its allowOverlap is true.
 
         Args:
             zones_data (list[ZoneData]): Array of data to create Zones.

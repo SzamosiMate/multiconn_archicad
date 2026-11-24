@@ -106,6 +106,8 @@ from multiconn_archicad.models.tapir.commands import (
     ModifyGraphicOverrideCombinationsResult,
     ModifyGraphicOverrideRulesParameters,
     ModifyGraphicOverrideRulesResult,
+    ModifyLayersParameters,
+    ModifyLayersResult,
     ModifyPensParameters,
     ModifyPensResult,
     MoveAttributesAndFoldersParameters,
@@ -182,6 +184,7 @@ from multiconn_archicad.models.tapir.types import (
     LayerCombinationAttribute,
     LayerCombinationDataArrayItem,
     LayerData,
+    LayerModificationData,
     Layers,
     LayersOfElementDefault,
     LayersOfElementDefaults,
@@ -762,27 +765,36 @@ class AttributeCommands:
         dry_run: None | bool = None,
     ) -> DeleteAndReplaceAttributesResult:
         """
-        Deletes fills, line types, surfaces or building materials and replaces each by another
-        attribute of the same type wherever it was used, like Delete and Replace in the
-        Attribute Manager. Every reference is rewritten to the replacement, the way
-        ReindexAttributes rewrites them: the fields of the elements in the floor plan and in
-        every view and layout, the parameters of library part based elements, their memo data,
-        the tool defaults, the Favorites, the other attributes that refer to it (composites,
-        building materials, surfaces, profiles, MEP systems) and the graphic override rules.
-        Elements on a hidden or locked layer are changed too: their layers are shown and
-        unlocked for the change and put back afterwards (in the current window). If an element
-        cannot be changed (it is locked itself, or not reserved in Teamwork), everything is put
-        back and that attribute is not deleted. Elements from hotlinked modules cannot be
-        changed and are listed. Indices typed into GDL scripts are not found, and the frame and
-        panel classes of curtain wall Favorites and of the Curtain Wall tool default keep the
-        deleted attribute (named in the warnings). If a tool default, Favorite, attribute or
-        rule cannot be rewritten to the replacement, it keeps a copy of the deleted attribute
-        with its name and a new attribute id, named in the warnings. The whole call is one undo
-        step. With dryRun true nothing is changed and no undo step is created: the response has
-        dryRun set to true, and each attribute that passes the checks gets wouldDelete and lists
-        every reference a real run would rewrite (elements, tool defaults, Favorites, other
-        attributes, graphic override rules, elements from hotlinked modules). Available from
-        Archicad 27.
+        Deletes fills, line types, surfaces, building materials, profiles, zone categories or
+        layers and replaces each by another attribute of the same type wherever it was used,
+        like Delete and Replace in the Attribute Manager. Every reference is rewritten to the
+        replacement, the way ReindexAttributes rewrites them: the fields of the elements in the
+        floor plan and in every view and layout, the parameters of library part based elements,
+        their memo data, the tool defaults, the Favorites, the other attributes that refer to it
+        (composites, building materials, surfaces, profiles, MEP systems) and the graphic
+        override rules. A profile is replaced where a wall or a column or beam segment uses the
+        profile structure, and in the Profile parameters of library part based elements; a zone
+        category in zones. A layer is emptied instead, since deleting a layer deletes its
+        elements: every element on it, in the floor plan and in every view and layout, is moved
+        to the replacement layer (as ReindexLayers moves them), then the tool defaults and
+        Favorites on it, and the layer is deleted only once it is empty. The Archicad Layer
+        cannot be deleted, a layer with elements from a hotlinked module is not deleted, and if
+        an element cannot be moved or Archicad does not delete the layer, everything is put
+        back. The sections, elevations, interior elevations and 3D documents that show elements
+        of the deleted layer are listed in viewsToRebuild. Elements on a hidden or locked layer
+        are changed too: their layers are shown and unlocked for the change and put back
+        afterwards (in the current window). If an element cannot be changed (it is locked
+        itself, or not reserved in Teamwork), everything is put back and that attribute is not
+        deleted. Elements from hotlinked modules cannot be changed and are listed. Indices typed
+        into GDL scripts are not found, and the frame and panel classes of curtain wall
+        Favorites and of the Curtain Wall tool default keep the deleted attribute (named in the
+        warnings). If a tool default, Favorite, attribute or rule cannot be rewritten to the
+        replacement, it keeps a copy of the deleted attribute with its name and a new attribute
+        id, named in the warnings. The whole call is one undo step. With dryRun true nothing is
+        changed and no undo step is created: the response has dryRun set to true, and each
+        attribute that passes the checks gets wouldDelete and lists every reference a real run
+        would rewrite (elements, tool defaults, Favorites, other attributes, graphic override
+        rules, elements from hotlinked modules). Available from Archicad 27.
 
         Args:
             attribute_type (ReplaceableAttributeType)
@@ -1783,9 +1795,9 @@ class AttributeCommands:
             fields (None | list[ProfileAttributeField]): Names of the fields to return for each
                 Profile. If omitted, every field is returned. Note the raw cross-section vector
                 geometry itself is not exposed; width/height/minimumWidth/minimumHeight/widthStr
-                etchable/heightStretchable/hasCoreSkin/profileModifiers are derived measurements
-                matching what the Profile Editor shows, computed from the profile's internal
-                stretch/parameter data.
+                etchable/heightStretchable/stretchZones/hasCoreSkin/profileModifiers are derived
+                measurements matching what the Profile Editor shows, computed from the profile's
+                internal stretch/parameter data.
 
         Returns:
             list[ErrorItem | ProfileAttribute]: A list of profiles or errors.
@@ -2096,6 +2108,43 @@ class AttributeCommands:
             validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
         )
         validated_response = ModifyGraphicOverrideRulesResult.model_validate(response_dict)
+        return validated_response.executionResults
+
+    def modify_layers(
+        self, layers: list[LayerModificationData]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Changes the given settings of existing layers: shown or hidden, locked, wireframe, the
+        intersection group and the name. Only the given fields of a layer are changed; every
+        other setting is kept, so unlike CreateLayers with overwriteExisting the whole layer
+        need not be given. Archicad keeps the shown, locked and wireframe state of a layer per
+        open window; like CreateLayers, this changes it in the current window. A name must not
+        be empty or used by another layer, and the built-in Archicad Layer cannot be renamed.
+        Each layer gets its own execution result. In a Teamwork project the LayerSettingsDialog
+        lockable object set must be reserved first (see ReserveLockableObjectSet).
+
+        Args:
+            layers (list[LayerModificationData]): The layers to change. Only the given fields of
+                a layer are changed; every other setting of it is kept.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result per layer, in
+                the input order.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "layers": layers,
+        }
+        validated_params = ModifyLayersParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "ModifyLayers",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = ModifyLayersResult.model_validate(response_dict)
         return validated_response.executionResults
 
     def modify_pens(

@@ -17,6 +17,8 @@ from multiconn_archicad.models.tapir.commands import (
     GetSolidElementLinksParameters,
     GetSolidElementLinksResult,
     MergeElementsParameters,
+    RemoveElementTrimDirectionParameters,
+    RemoveElementTrimDirectionResult,
     RemoveElementTrimsParameters,
     RemoveElementTrimsResult,
     RemoveSolidElementLinksParameters,
@@ -28,7 +30,7 @@ from multiconn_archicad.models.tapir.commands import (
 from multiconn_archicad.models.tapir.types import (
     ElementId,
     ElementIdArrayItem,
-    ElementPair,
+    ElementTrimPair,
     ElementTrims,
     ElementUnmergePair,
     ErrorItem,
@@ -230,8 +232,50 @@ class SolidElementOperationCommands:
         validated_response = TypeAdapter(SuccessfulExecutionResult).validate_python(response_dict)
         return validated_response
 
+    def remove_element_trim_direction(
+        self, element_pairs: list[ElementTrimPair]
+    ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
+        """
+        Removes one direction of a trim: the trim of an element by a roof or shell, keeping the
+        other direction when the two trim each other (two roofs or shells). The Archicad API can
+        only remove both directions at once, so the command reads the other direction and its
+        trim type, removes the trim and trims the other direction again, in one undo step, and
+        reads the result back. A pair whose element is not trimmed by its trimming element fails
+        without changing anything; when Archicad fails to remove or trim again, the whole call
+        is undone.
+
+        Args:
+            element_pairs (list[ElementTrimPair]): Per pair, the trim of elementId by
+                trimmingElementId is removed. When trimmingElementId is trimmed by elementId too
+                (two roofs or shells trimming each other), that other direction is kept, with
+                its trim type. The pairs are done in order, each on the trims the pairs before
+                it left, so the two pairs of two roofs remove both directions.
+
+        Returns:
+            list[FailedExecutionResult | SuccessfulExecutionResult]: One result for each input
+                pair, in the order of the input. A pair whose element is not trimmed by its
+                trimming element fails and changes nothing. When Archicad fails to remove a trim
+                or to trim the kept direction again, the whole call is undone and every pair
+                fails, the pair that failed with the reason.
+
+        Raises:
+            ArchicadAPIError: If the API returns an error response.
+            RequestError: If there is a network or connection error.
+            pydantic.ValidationError: If the parameters, or the API Response fail validation.
+        """
+        params_dict = {
+            "elementPairs": element_pairs,
+        }
+        validated_params = RemoveElementTrimDirectionParameters(**params_dict)
+        response_dict = self._core.post_tapir_command(
+            "RemoveElementTrimDirection",
+            validated_params.model_dump(mode="json", by_alias=True, exclude_none=True, exclude_defaults=True),
+        )
+        validated_response = RemoveElementTrimDirectionResult.model_validate(response_dict)
+        return validated_response.executionResults
+
     def remove_element_trims(
-        self, element_pairs: list[ElementPair]
+        self, element_pairs: list[ElementTrimPair]
     ) -> list[FailedExecutionResult | SuccessfulExecutionResult]:
         """
         Removes the trim between an element and the roof or shell trimming it. The Archicad API
@@ -242,7 +286,7 @@ class SolidElementOperationCommands:
         its trimming element gets wouldDelete.
 
         Args:
-            element_pairs (list[ElementPair]): The trimmed element and the roof or shell
+            element_pairs (list[ElementTrimPair]): The trimmed element and the roof or shell
                 trimming it, per pair. The trimming connection between the two is removed: when
                 they trim each other, both directions are removed.
 
@@ -266,7 +310,7 @@ class SolidElementOperationCommands:
         )
         return TypeAdapter(list[ExecutionResult]).validate_python(response_dict.get("executionResults"))
 
-    def remove_element_trims_dry_run(self, element_pairs: list[ElementPair]) -> RemoveElementTrimsResult:
+    def remove_element_trims_dry_run(self, element_pairs: list[ElementTrimPair]) -> RemoveElementTrimsResult:
         """
         Preview this command without applying its changes. Removes the trim between an element
         and the roof or shell trimming it. The Archicad API removes the trimming connection
@@ -277,7 +321,7 @@ class SolidElementOperationCommands:
         wouldDelete.
 
         Args:
-            element_pairs (list[ElementPair]): The trimmed element and the roof or shell
+            element_pairs (list[ElementTrimPair]): The trimmed element and the roof or shell
                 trimming it, per pair. The trimming connection between the two is removed: when
                 they trim each other, both directions are removed.
 
