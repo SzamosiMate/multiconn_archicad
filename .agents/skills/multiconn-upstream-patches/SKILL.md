@@ -11,7 +11,7 @@ Use the current downstream inventory to find useful source-schema improvements. 
 
 - `review`: investigate and recommend; do not modify Tapir source or publish/sync remote branches.
 - `prepare`: implement and validate locally when the user explicitly wants preparation only.
-- `publish`: sync the fork, implement, validate, commit and push reviewable fork branches, then stop for user review. This is the default for requests such as “bring the temporary patches upstream” or “prepare PRs.” After approval, open the reviewed PRs using the prepared descriptions.
+- `publish`: sync the fork, implement, validate, commit and push reviewable fork branches, then stop for user review. This is the default for requests such as “bring the temporary patches upstream” or “prepare PRs.” After approval, open the reviewed PRs as drafts using the prepared descriptions.
 
 Infer scope from the request and existing authorization. Preserve an explicit local-only or review-only instruction. Do not regenerate models, change the release pin, remove patches merely because source changes merged, or start this workflow automatically after codegen. Explain any incorrect client patch separately and change it only within scope.
 
@@ -64,13 +64,13 @@ Describe upstream changes in commit subjects rather than downstream patch debt. 
 
 Finish implementation, validation, the run report and its staging before opening any upstream PR, including a draft. For multiple batches, present one review table with each branch/diff, title, affected commands and definition names, validation result, and any dependencies or compatibility decisions. Prepare each full PR body in a scratch file and link it for review; do not require the user to copy descriptions between chats and GitHub.
 
-Stop for review. Approval such as “go ahead” in response to that concrete proposal authorizes opening the reviewed PRs, without a second confirmation. Respect approval of only selected batches. Use the prepared titles and bodies, check for existing PRs before creating them, and return their links. If scope materially changes after approval, present the affected batch again. If the user chooses manual submission, provide copyable Markdown instead. Do not merge PRs or post command comments unless separately requested.
+Stop for review. Approval such as “go ahead” in response to that concrete proposal authorizes opening the reviewed PRs as drafts, without a second confirmation. Respect approval of only selected batches. Use the prepared titles and bodies, check for existing PRs before creating them, and verify `isDraft=true` before returning their links. If scope materially changes after approval, present the affected batch again. If the user chooses manual submission, provide copyable Markdown and instruct them to create drafts. Do not mark PRs ready or request merging unless the user explicitly authorizes merging.
 
 ### Schema-refinement PR format
 
-Use a short aim, the exact names and consumers changed, and validation evidence. Add `<!-- tapir-schema-refinement -->` to equivalent refinement PR bodies. Do not use that marker for intentional acceptance changes; submit those separately with their justification.
+Use a short aim, the exact names and consumers changed, and validation evidence. Create PRs with `--draft`; no `tapir-schema-refinement` marker or label is needed. Draft status prevents Tapir's auto-merger from taking them before the final check. Keep intentional acceptance changes in separate PRs with their justification.
 
-Inspect the workflow on upstream's default branch before describing its behavior as available. Where supported, the PR author can post `/check-schema`; `/merge-schema` requires repository write access. The marker does not itself make a check required or authorize merging. Keep any remaining merge race explicit; do not claim that the API atomically pins main.
+After reviewing a draft, a maintainer starts `schema_refinement.yml` from `main` with its PR number and `merge=true`. The action compares against current main while the PR remains draft, then marks it ready and requests a merge only after validation and existing checks pass. Do not mark it ready by hand first. See [manual action usage](references/schema-review.md#manual-action) for the CLI command. The local preflight and this final action are the two schema comparisons; do not add a separate automatic PR comparison. Inspect upstream's current workflow before dispatching it, and do not claim that the merge API atomically pins main.
 
 ## Validate proportionately
 
