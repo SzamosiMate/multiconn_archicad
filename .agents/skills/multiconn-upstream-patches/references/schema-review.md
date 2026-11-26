@@ -40,10 +40,22 @@ Pass the actual fetched upstream ref or SHA if it has a different name. `--head`
 
 The comparison ignores prose annotations and handles the required-only object selectors used by Tapir. It follows references while comparing constraint siblings and recursive schemas. It checks the documentation generator's target Archicad version. Continue to review annotations, common-schema access and execution separately, and build or run live checks when the change warrants them.
 
-### Local check and Tapir's command workflow
+### Local check and Tapir's manual workflow
 
-The proposed Tapir `schema_refinement.yml` in PR #2814 calls `tools/check_schema_refinement.py`. Its structural rules currently match this skill's check: compare current base with the proposed merge, resolve references, preserve constraints and union semantics, and reject removed commands, fields, or existing definition names. Added definitions are allowed. Both use the docs generator's newest supported Archicad version.
+Tapir's `schema_refinement.yml` calls `tools/check_schema_refinement.py`. Its structural rules currently match this skill's check: compare current base with the proposed merge, resolve references, preserve constraints and union semantics, and reject removed commands, fields, or existing definition names. Added definitions are allowed. Both use the docs generator's newest supported Archicad version.
 
-The local script runs each revision's own documentation generator and prints structural differences. The workflow uses a trusted default-branch generator, rejects links in snapshots, runs without write credentials, and saves a JSON report that also includes annotation differences and new names. Its command controller separately checks permissions, file scope, builds, reviews, and ref freshness. Those are not part of the local script's structural check.
+The local script runs each revision's own documentation generator and prints structural differences. The workflow uses a trusted default-branch generator, rejects links in snapshots, runs without write credentials, and saves a JSON report that also includes annotation differences and new names. Its controller separately checks permissions, file scope, builds, reviews, draft status, and ref freshness. Those are not part of the local script's structural check.
 
 Use the local script for reviewed source proposals. Where the upstream workflow is available, its result is the final check for that workflow; a local pass does not authorize merging or remove the API's remaining base race. Do not execute an unreviewed PR's Python through the local script.
+
+### Manual action
+
+After the user authorizes merging, keep the PR draft and run:
+
+```text
+gh workflow run schema_refinement.yml -R ENZYME-APD/tapir-archicad-automation --ref main -f pr=1234 -f merge=true
+```
+
+Replace `1234` with the reviewed PR number. Write access is required. The action keeps the PR draft during validation, then marks it ready and requests a merge. Failed validation leaves it draft; a later merge failure attempts to restore draft status. Results appear in PR comments and the run's `schema-report` artifact.
+
+For a negative test or check-only run, use `merge=false`; this leaves readiness unchanged. That is optional testing, not another required preflight. The API pins the PR head but leaves a small race with a concurrent main update after the final check.
