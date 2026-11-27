@@ -48,6 +48,16 @@ The local script runs each revision's own documentation generator and prints str
 
 Use the local script for reviewed source proposals. Where the upstream workflow is available, its result is the final check for that workflow; a local pass does not authorize merging or remove the API's remaining base race. Do not execute an unreviewed PR's Python through the local script.
 
+### Claude review
+
+After opening a draft, request review without marking it ready:
+
+```text
+gh workflow run claude_pr_review.yml -R ENZYME-APD/tapir-archicad-automation --ref main -f pr_number=1234
+```
+
+Confirm the deployed workflow permits explicit reviews of drafts. If it still skips them, report the blocked review; do not mark the PR ready as a workaround. Record the PR head and run URL, wait for that run, then read the bot's summary and findings. A successful job alone is not an approval. If the head changed during review, do not present it as reviewed. Review can run alongside ordinary build CI. If the run fails or is refused, return it as an incomplete review instead of automatically retrying.
+
 ### Manual action
 
 After the user authorizes merging, keep the PR draft and run:

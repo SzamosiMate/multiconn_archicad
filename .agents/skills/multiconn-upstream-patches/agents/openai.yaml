@@ -1,4 +1,4 @@
 interface:
   display_name: "Refine Tapir API Schemas"
   short_description: "Review and publish Tapir API schema refinements"
-  default_prompt: "Use $multiconn-upstream-patches to review the latest codegen follow-up, sync my fork and prepare coherent, validated schema refinement batches. Stop for me to review the batch list and prepared descriptions, then open the approved PRs as drafts when I say go ahead. Leave merging to the manually triggered schema action."
+  default_prompt: "Use $multiconn-upstream-patches to prepare coherent, validated schema refinement batches. Prefer upstream topic branches when I have write access. Open draft PRs, manually request Claude review, and return the PR links and review results for my review. Leave merging to the manual schema action after my explicit authorization."
