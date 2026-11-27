@@ -1,6 +1,6 @@
 ---
 name: multiconn-upstream-patches
-description: Review MultiConn schema patches against Tapir source and publish justified API schema refinements to the user's fork after a release update. Supports review-only and local preparation; client model regeneration belongs to multiconn-codegen.
+description: Review MultiConn schema patches against Tapir source and prepare validated draft PRs with Claude review for human review. Supports review-only and local preparation; client model regeneration belongs to multiconn-codegen.
 ---
 
 # Refine Tapir API schemas upstream
@@ -11,7 +11,7 @@ Use the current downstream inventory to find useful source-schema improvements. 
 
 - `review`: investigate and recommend; do not modify Tapir source or publish/sync remote branches.
 - `prepare`: implement and validate locally when the user explicitly wants preparation only.
-- `publish`: sync the fork, implement, validate, commit and push reviewable fork branches, then stop for user review. This is the default for requests such as “bring the temporary patches upstream” or “prepare PRs.” After approval, open the reviewed PRs as drafts using the prepared descriptions.
+- `publish`: implement, validate, commit and push topic branches, open draft PRs, and manually request Claude review. Stop for human review on the PRs after Claude finishes. This is the default for requests such as “bring the temporary patches upstream” or “prepare PRs.”
 
 Infer scope from the request and existing authorization. Preserve an explicit local-only or review-only instruction. Do not regenerate models, change the release pin, remove patches merely because source changes merged, or start this workflow automatically after codegen. Explain any incorrect client patch separately and change it only within scope.
 
@@ -19,9 +19,9 @@ Infer scope from the request and existing authorization. Preserve an explicit lo
 
 Read the relevant final release report in `code_generation/documentation/reports/codegen/` and any prior upstream run report in `code_generation/documentation/reports/upstream-patches/`, the active `schema-patch-tracking.md`, and relevant calls/helpers in `code_generation/shared/schema_patching.py`. Use `tapir_unpatched_schema.json` and `tapir_master_schema.json` for released comparisons; confirm the client release and local patch revision. They are not upstream-main snapshots. Historical reports are supporting evidence, not mandatory reading when current source answers the question. Use the [pipeline brief](../../../code_generation/documentation/archicad_api_codegen_brief.md) only when generation-layer context is needed.
 
-Locate the Tapir checkout from remotes and user context. Read its repository instructions and working-tree state. Discover the upstream repository, the user's fork and default branches rather than assuming `origin` is upstream. Record the client release, exact source baseline and final branch tip; avoid routine per-file hashes and exhaustive snapshots in durable reports.
+Locate the Tapir checkout from remotes and user context. Read its repository instructions and working-tree state. Discover the upstream repository, available fork and default branches rather than assuming `origin` is upstream. Record the client release, exact source baseline and final branch tip; avoid routine per-file hashes and exhaustive snapshots in durable reports.
 
-For `publish`, start by fast-forward syncing the fork's matching default branch, for example `gh repo sync <fork-owner/repo> --source <upstream-owner/repo> --branch <default-branch>`, then fetch and verify the chosen base. Syncing needs no manual GitHub UI step. Never add `--force` to reset the fork's default branch. If it has diverged, preserve its commits, report that sync was skipped and base the proposal on fetched upstream instead. Preserve unrelated local work.
+For new proposals, prefer topic branches in upstream when the user has write access. Use a fork when access or the user's preference requires it; preserve the head location of existing PRs. Fetch and verify upstream's default branch before starting. Only when publishing through a fork, fast-forward sync its default branch with `gh repo sync <fork> --source <upstream> --branch <default-branch>`. Never force-reset a fork's default branch; preserve divergent commits and base the proposal on fetched upstream instead. Preserve unrelated local work.
 
 Inspect existing PRs and active tracking before starting duplicate work. Review temporary and unresolved source-review candidates, including older items without a disposition; distinguish unmerged, merged-awaiting-release and released fixes. Skip already merged proposals. Permanent generator workarounds and intentional client contract choices remain out of scope unless selected. Valid inline schemas need not be extracted just because a generator names them poorly; require independent schema-design value or an explicitly selected extraction policy.
 
@@ -58,13 +58,15 @@ Example:  schema/refinements-1.7.1
 
 The version identifies the reviewed release, not a promise about the release containing the changes. Add a short suffix only when separate proposals genuinely need it. Reuse an existing proposal's branch and keep an open PR's head intact; do not rename it just to adopt this convention.
 
-Describe upstream changes in commit subjects rather than downstream patch debt. Use an explanatory body when provenance or a compatibility decision matters. Follow requested commit/amend history. After validation, commit only intended Tapir source changes, push to the user's fork and verify its remote tip. Rebase an existing branch when requested or needed for integration; force-push only with authorization and an explicit lease on the recorded remote tip. The first stopping point is published fork branches with contents and prepared PR text ready for user review.
+Describe upstream changes in commit subjects rather than downstream patch debt. Use an explanatory body when provenance or a compatibility decision matters. Follow requested commit/amend history. After validation, commit only intended Tapir source changes, push to the selected repository's topic branch and verify its remote tip. Rebase an existing branch when requested or needed for integration; force-push only with authorization and an explicit lease on the recorded remote tip. Never publish directly to upstream main.
 
-### Human review before PR submission
+### Draft PR, Claude review, then human review
 
-Finish implementation, validation, the run report and its staging before opening any upstream PR, including a draft. For multiple batches, present one review table with each branch/diff, title, affected commands and definition names, validation result, and any dependencies or compatibility decisions. Prepare each full PR body in a scratch file and link it for review; do not require the user to copy descriptions between chats and GitHub.
+In `publish` mode, open each validated branch as a draft PR without an intermediate approval or copy/paste step. Use the prepared title and body, check for an existing PR first, and verify `isDraft=true`.
 
-Stop for review. Approval such as “go ahead” in response to that concrete proposal authorizes opening the reviewed PRs as drafts, without a second confirmation. Respect approval of only selected batches. Use the prepared titles and bodies, check for existing PRs before creating them, and verify `isDraft=true` before returning their links. If scope materially changes after approval, present the affected batch again. If the user chooses manual submission, provide copyable Markdown and instruct them to create drafts. Do not mark PRs ready or request merging unless the user explicitly authorizes merging.
+Manually request Claude review while the PR stays draft; see [Claude review](references/schema-review.md#claude-review). Wait for the run and read its summary and inline findings: a green Actions job means the review ran, not that it approved the change. Fix actionable findings within scope, repeat affected validation, and request at most one follow-up review. Stop with the findings if another round would be needed or a contract decision requires the user. Do not expand scope just to satisfy a bot suggestion.
+
+Return a compact table of draft PR links, affected commands/names, validation, Claude's result, and remaining decisions. Human review happens on those PRs. Do not mark them ready or launch the merge action until the user explicitly authorizes merging. If the user chooses manual submission, provide copyable Markdown instead.
 
 ### Schema-refinement PR format
 
@@ -84,7 +86,7 @@ Do not use indiscriminate expansion as proof: preserve reference siblings, recur
 
 ## Deliver one run record and maintain the active queue
 
-Return the branch/commit or existing PR link and the main validation result. For batch review, use the review table and linked prepared bodies above; after approved submission, return PR links. Provide fenced Markdown titles/descriptions when the user wants manual submission. Explain the resulting upstream schema and material compatibility consequences; keep routine test logs and investigation history out of the PR body. Do not force the title to list every affected domain.
+Return draft PR links with the main validation and Claude review results. For local preparation, return the branch/diff and prepared PR text instead. Provide fenced Markdown titles/descriptions when the user wants manual submission. Explain the resulting upstream schema and material compatibility consequences; keep routine test logs and investigation history out of the PR body. Do not force the title to list every affected domain.
 
 Maintain **at most one durable upstream report per logical run**, including follow-up reviews, description edits, rebases and publication on later dates. Store it at `code_generation/documentation/reports/upstream-patches/upstream-refinements-<version>-<start-date>.md` and update it in place. Read generation reports from the sibling `reports/codegen/` folder; keep relative links valid across these folders. Keep only useful decisions/rejected alternatives, source baseline/final head/PR, compatibility evidence and validation limits. When both a reference and its definition retain descriptions, list their locations and full strings. Link to active tracking instead of repeating its path inventory. Keep scratch scripts, intermediate logs and snapshots untracked; no additional report per phase, day or question. A no-new-work review may only need a tracking update.
 
