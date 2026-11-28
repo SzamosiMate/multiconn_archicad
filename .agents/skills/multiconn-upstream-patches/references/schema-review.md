@@ -48,6 +48,22 @@ The local script runs each revision's own documentation generator and prints str
 
 Use the local script for reviewed source proposals. Where the upstream workflow is available, its result is the final check for that workflow; a local pass does not authorize merging or remove the API's remaining base race. Do not execute an unreviewed PR's Python through the local script.
 
+### Parallel-batch checks
+
+Independent branches must compose as well as pass individually. Multiple additions at the same closing brace of the common JSON file are a predictable textual conflict, even when their definition names and contracts are disjoint. Use separate existing domain anchors and preserve unrelated formatting.
+
+Before publishing or updating a set of independent proposals:
+
+1. Pin fetched main and each proposed committed head. Include other relevant open schema proposals when they overlap the same source locations.
+2. Use temporary Git objects or an isolated checkout to trial-merge each pair in both orders and the complete set in the intended merge order. Do not alter the user's branches to conduct the test. If the result depends on order, declare and test that dependency rather than claiming independence.
+3. Reject conflicts, duplicate JSON keys, unresolved references, lost definitions/references, and incompatible edits to an existing definition. Compare the combined result with the union of the reviewed changes; a textual merge alone can silently lose intended content.
+4. Run the full structural comparison between pinned main and the combined candidate, in addition to the required individual proposal checks. Verify each proposal's new named contracts survive unchanged. Cache snapshots by exact source/merge tree so equivalent orderings need no additional generation. If a real dependency changes acceptance, isolate and explain its exact paths as usual.
+5. Record base, heads, tested order(s) and results in the logical run's existing report. Repeat affected checks when a head or main changes. An individual pass against a common ancestor is not joint integration evidence.
+
+In publish mode, a failing joint check blocks submission of the conflicting set until its layout or dependency is resolved. In prepare mode, resolve it locally before declaring the proposals ready. Review-only mode can report the conflict without changing source.
+
+Parallel preparation/review does not imply parallel integration. When authorized to merge, run the final validation-and-merge actions sequentially and capture main when each proposal's turn starts. Serializing only the merge API call leaves earlier validation stale. The current workflow uses per-PR concurrency, which permits different PRs to run against the same old main; do not dispatch those merge runs together. If another merge advances main during validation, retain the freshness failure, refresh/test the remaining candidate and start a new authorized run. Do not assume that an Actions concurrency group is a durable queue for every submitted proposal.
+
 ### Claude review
 
 After opening a draft, request review without marking it ready:
@@ -69,3 +85,25 @@ gh workflow run schema_refinement.yml -R ENZYME-APD/tapir-archicad-automation --
 Replace `1234` with the reviewed PR number. Write access is required. The action keeps the PR draft during validation, then marks it ready and requests a merge. Failed validation leaves it draft; a later merge failure attempts to restore draft status. Results appear in PR comments and the run's `schema-report` artifact.
 
 For a negative test or check-only run, use `merge=false`; this leaves readiness unchanged. That is optional testing, not another required preflight. The API pins the PR head but leaves a small race with a concurrent main update after the final check.
+
+### Ordered merge queue
+
+The queue implementation belongs in Tapir at `tools/queue_schema_refinements.py` ([helper PR #3116](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/3116)). When that helper is available in the chosen checkout, preview an explicit list from the Tapir root:
+
+```text
+python tools/queue_schema_refinements.py 3104 3105
+```
+
+After the maintainer has authorized merging those PRs, run the same list with `--merge`:
+
+```text
+python tools/queue_schema_refinements.py 3104 3105 --merge
+```
+
+The helper uses the authenticated `gh` CLI, captures each listed PR head, waits for its existing CI checks, dispatches `schema_refinement.yml` from main, and watches the exact returned run URL at a default 20-second interval. Each action must finish before the next dispatch. A changed head before dispatch moves that PR to the back of the queue with its new head; CI and the fresh schema action run again on its next turn. Main advancing between queued actions needs no retry: each new action captures fresh main. If main advances during validation, a confirmed controller freshness rejection moves that PR to the back for a new comparison. Head and stale-base changes share a default limit of three reschedules per PR. The server workflow still captures fresh main and enforces its existing validation/build/review gates. Queueing removes manual waiting; it does not shorten the schema comparison.
+
+Use one queue at a time. Definite per-PR failures (failed CI, invalid/closed PR, exhausted reschedules, a completed failed action, or a completed action without a merged PR) remove that item, record its failure, and let the remaining items proceed. The exception is an identified stale-base rejection: require the exact freshness error from the trusted prepare/finish controller job, an unchanged PR head, and for finish failures a matching `schema-request` artifact and proof current main differs from its pinned base. Log/artifact/metadata failures or generic validation/build/conflict errors do not authorize automatic redispatch. No rebase or force-push is performed. The final summary lists failed items and the command exits nonzero if any failed.
+
+A failed run watcher is not proof the server action finished. The helper polls that same action's status within the remaining wait budget, including retrying status-read failures. It dispatches nothing else until the action is confirmed completed. An expired wait with an active/unknown action, or an unidentified dispatch, blocks the remaining queue for inspection. Stopping the helper does not cancel a dispatched action. If an older `gh` does not return a run URL, the dispatch may still have succeeded: inspect it rather than guessing the latest run or sending a duplicate. Already-merged entries are skipped when the explicit list is resumed.
+
+This is a one-shot local command, not a standing watcher or scheduled automation. Its existence does not authorize merges. Defaults are a read-only preview, 20-second polling, a 90-minute timeout for each CI/action wait, and three head/stale-base reschedules per PR. `--interval`, `--timeout-minutes` and `--max-reschedules` adjust these; zero reschedules removes a PR on its first candidate change. Keep the strict moved-base validation failure if another actor merges concurrently: rescheduling must run a fresh comparison, never waive the server check or reuse a stale pass.

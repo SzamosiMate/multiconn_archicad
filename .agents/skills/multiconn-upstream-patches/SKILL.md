@@ -46,6 +46,17 @@ Before implementing a large inventory, propose a compact batch plan. For an inve
 
 Base independent batches on upstream main and use one focused commit per batch where practical. State dependencies when a batch genuinely requires another; do not silently stack independent PRs. Keep acceptance changes separate from equivalent extractions.
 
+### Require batches to merge together
+
+When preparing or refreshing multiple independent schema PRs, **do not publish the set until it passes joint integration checks**, not just separate checks against main. Read [parallel-batch checks](references/schema-review.md#parallel-batch-checks).
+
+- Place new common definitions near their existing domain definitions, using distinct insertion anchors for independent topics. Do not append every batch at the end of `CommonSchemaDefinitions.json` or reformat unrelated blocks.
+- Trial-merge each pair in both orders and the complete set in its intended merge order, using temporary Git objects or an isolated checkout. Require conflict-free merges, unique JSON keys, and preservation of every batch's definitions and references; validate the combined schema contracts. Cache equivalent merged trees rather than repeating generation.
+- If two topics need the same edit or insertion anchor, redistribute the edits or declare an explicit dependency/merge order. Never present conflicting branches as independent and ready for submission.
+- Repeat the affected integration checks after changes to a batch or its base. Record the tested heads, base and merge order in the existing run report. Separate branch checks do not establish that the branches merge together.
+
+Preparation and review may run in parallel. Final validation-and-merge actions must run one at a time: start the next only after the previous run finishes, with freshly fetched main. Keep freshness checks strict; a moved base requires a new candidate comparison, not a waived check. This serial execution rule does not grant merge authorization.
+
 ## Branches, commits and publication
 
 Use version-based names without a `codex/` prefix:
@@ -74,6 +85,8 @@ Use a short aim, the exact names and consumers changed, and validation evidence.
 
 After reviewing a draft, a maintainer starts `schema_refinement.yml` from `main` with its PR number and `merge=true`. The action compares against current main while the PR remains draft, then marks it ready and requests a merge only after validation and existing checks pass. Do not mark it ready by hand first. See [manual action usage](references/schema-review.md#manual-action) for the CLI command. The local preflight and this final action are the two schema comparisons; do not add a separate automatic PR comparison. Inspect upstream's current workflow before dispatching it, and do not claim that the merge API atomically pins main.
 
+For an explicitly authorized ordered list, a Tapir checkout providing `tools/queue_schema_refinements.py` can run the same actions sequentially without manual waiting. The helper belongs in Tapir; this skill owns only the invocation guidance. Preview first and use `--merge` only with existing merge authorization. See [ordered merge queue](references/schema-review.md#ordered-merge-queue).
+
 ## Validate proportionately
 
 Interpret sources using Tapir's current documentation tooling in memory or isolated temporary output. Cache the baseline for the run. Check reference resolution, name collisions, command access to common definitions and the complete structural difference against that baseline. Do not hand-edit or commit generated docs.
@@ -94,4 +107,4 @@ Maintain **at most one durable upstream report per logical run**, including foll
 
 Automatically stage the completed run report in the **MultiConn checkout** with `git add -- code_generation/documentation/reports/upstream-patches/upstream-refinements-<version>-<start-date>.md`, using the exact current report path. Restage that same report after final revisions or later follow-ups in the logical run. Stage only this report; do not additionally stage tracking or unrelated files. Preserve existing staged changes and do not commit MultiConn changes unless requested. A review-only run remains read-only; a tracking-only no-new-work outcome has no report to stage.
 
-Retirement belongs to a later `$multiconn-codegen update tapir to <released-version>` run: confirm the correction in fetched release documentation, resolve renamed paths/dependencies, remove redundant calls, retain necessary aliases in `code_generation/shared/model_aliases.py`, then complete both representations, unified generation and tests. A source merge or release tag alone is insufficient. Preserve loud stale-patch guards. Do not create a watcher or scheduled task.
+Retirement belongs to a later `$multiconn-codegen update tapir to <released-version>` run: confirm the correction in fetched release documentation, resolve renamed paths/dependencies, remove redundant calls, retain necessary aliases in `code_generation/shared/model_aliases.py`, then complete both representations, unified generation and tests. A source merge or release tag alone is insufficient. Preserve loud stale-patch guards. Do not create a standing watcher or scheduled task. An explicitly requested finite merge queue for a listed set of approved PRs is allowed: finish after each listed item merges or is reported failed, with bounded head-change and confirmed stale-base reschedules. An uncertain in-flight action blocks further dispatches until reconciled or the wait times out.
