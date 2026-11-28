@@ -2,6 +2,63 @@
 
 Client target: **Tapir 2.0.1**. Released documentation checked: **2026-11-24**. The active operations live in [the patch source](../shared/schema_patching.py). The dated sections below preserve the candidate batches at their stated baselines. See the [2.0.1 adoption record](reports/codegen/tapir-2.0.1.md) for released definitions, compatibility aliases and follow-up.
 
+## Tapir 2.0.1 three-topic proposals — 2026-11-27
+
+Initially three independent upstream draft PRs at `5c0555cbee237e85ad385098b14794bc32f9cf52`.
+After #3106 merged, #3104 and #3105 were rebased directly onto main
+`52fd8877fbabe848b1f527646573a4fae3b21fad` with separate domain insertion locations.
+Both remaining branches and their combined result passed structural checks; both
+merge orders were conflict-free. Published heads: #3104 `135dd3bddc779f6ee4f69135b178850dc1906b11`,
+#3105 `72bc7ab9a03aaf4bba13f192368756612b04c110`. No new commits were added to those proposals.
+All three PRs are now merged; #3104 merged as `8d8480c13291c138fd731fb070e62a8f98f2eb5b`
+and #3105 as `e2ceba6cc95e4bdb5929997e85615c37ab1d0051` on 2026-11-27.
+They await equivalent released documentation before client patch retirement.
+See the [single run record](reports/upstream-patches/upstream-refinements-2.0.1-2026-11-27.md)
+for final tips, compatibility, validation and Claude findings. No client patch is removed.
+
+| Decision | Source / PR status | Original paths and retirement scope |
+| --- | --- | --- |
+| Analytical models: 38 definitions, 39 Temporary operations plus one further sharing consumer | [Merged #3104](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/3104), `schema/refinements-2.0.1-analytical` | Common roots `AnalyticalCrossSection` (`crossSectionType`, `profileParameters/items`, `alignment`), `AnalyticalCurve/type`, `AnalyticalCurveMember` (`FEMType`, `varyingSegmentList/items`), `AnalyticalSurfaceMember` (`surface`, `holeContours/items`, `FEMType`), `AnalyticalMemberPartRef` (`partRefType`, `customVertexData`, `ratioEdgeData`), `AnalyticalModelVariation/layerConnectionClassIds/items/oneOf/1`, point/edge/surface `loadSettings`, `AnalyticalPointLoadDetails/geometry`, `AnalyticalLink/linkSettings`, `AnalyticalRelease/releaseDescriptions/items`, `AnalyticalSupport/supportSettings`, `AnalyticalVisibilitySettings` scalar modes, and import/export mapping `items/items`. Preserve all nested contracts and share rigid-link end connections. `AnalyticalImportMappingTable/items/items/elemPartId` and `AnalyticalExportMappingTable/items/items/elemPartIds/items` share `AnalyticalElementPartId`. Retire only after equivalent released producers/references exist; retain `AnalyticalExportElementPartId` as a compatibility alias if the broader source name ships and inspect generated import-side names at adoption. |
+| Project preferences and dimension formats: 42 definitions, 67 Temporary operations | [Merged #3105](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/3105), `schema/refinements-2.0.1-preferences` | `GetProjectPreferencesParameters/preferenceTypes/items`; `GetProjectPreferencesResult` and `SetProjectPreferencesParameters` under `workingUnits`, `calculationUnits`, `dimensions`, `zones/lowCeilingAreaReduction/heightLimits/items`, `floorPlanCutPlane` and `referenceLevels`; `GetDimensionStandardsResult/dimensionStandards/items/settings`. Include nested format/level producers and every equivalent consumer from the Temporary calls. Preserve complete reads versus partial updates, height-limit bounds, standard/preference format differences and source selector values. Retire only on equivalent released definitions/references; current source already has 11 preference pages versus six in released 2.0.1. Names otherwise match current client names. |
+| Graphic override criteria: 21 definitions, 35 Temporary operations | [Merged #3106](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/3106), merge `52fd8877fbabe848b1f527646573a4fae3b21fad`; awaiting released documentation | All selected paths originate at `GraphicOverrideCriterion`: the 16 scalar producer fields from `structureType` through `renovationStatus`, five structured operands (`profileParameter`, `customPropertyBool`, `customPropertyString`, `customPropertyNumber`, `customPropertyInteger`), ten equivalent negative-operator consumers, and positive/negative wall-reference-line and slab-reference-plane fields. Retire after equivalent named definitions and all consumer references ship, preserving enums/order, custom-property restrictions and recursive criterion composition. Source names match the client names. |
+
+The remaining Temporary candidates and seven Breaking source-review operations stay
+in the active queue. These proposals introduce no acceptance correction/tightening.
+Release adoption must confirm the fetched documentation and resolve naming aliases;
+an upstream merge alone does not retire a patch.
+
+## Tapir 2.0.1 stair pilot — 2026-11-26
+
+Published one independent [stair schema batch](https://github.com/SzamosiMate/tapir-archicad-automation/tree/schema/refinements-2.0.1-stairs)
+from upstream `b85ee4740c924f9825431cf3f7c098487c308c96`: **35 named definitions,
+39 Temporary operations** (35 producers and four sharing consumers). See the
+[single run record](reports/upstream-patches/upstream-refinements-2.0.1-2026-11-26.md)
+for definition names, original paths, compatibility and validation. Submitted as
+[draft PR #3084](https://github.com/ENZYME-APD/tapir-archicad-automation/pull/3084)
+after user review; verified head `6669cf01990b24b0cbc9882379a5f2f1c5801b05`.
+**Merged 2026-11-26**; confirmed present in source baseline `5c0555cbe` during
+the 2026-11-27 run. It now awaits equivalent released documentation for retirement.
+
+The original common-schema paths are the stair operations in `apply_temporary_patches`:
+baseline edges/vertices, boundaries and uniform side supports under `StairDetails`
+and `StairBoundary`; story visibility records under `StairStructureVisibilitySettings`;
+and the scalar fields under `StairBaseLineEdge`, `StairDetails`, `StairHeadroom`,
+`StairLayout`, `StairLayoutSettings`, `StairRiserDetails`, `StairStructureDetails`,
+`StairStructureDraining`, `StairSideStructure` and `StairStructureSymbolSettings`.
+The four sharing consumers are `StairStructureDrainingSettings/side`,
+`StairStructureDrainingSettings/surfaceType`,
+`StairSideStructureSettings/heightMeasure` and
+`StairStructureFillVisibility/structureType` (the last parent is extracted from
+`StairStructureVisibilitySettings/stories/items/fills/items`).
+
+Retire these operations only after fetched release documentation supplies equivalent
+definitions and references at every affected producer and consumer. Preserve
+requiredness, bounds, enum order and readback `Unknown` alternatives. If these
+source names ship, retain client aliases `SegmentType` → `StairBaselineSegmentType`,
+`BreakLineAngleType` → `StairBreakLineAngleType` and `BreakLinePositionType` →
+`StairBreakLinePositionType`. Inline stair creation/modification contracts and the
+Permanent item-naming policy remain outside this pilot. No current patch is removed.
+
 ## Tapir 2.0.1 adoption — 2026-11-23
 
 The released documentation supplies `DimensionMarker`, `RoofPivotEdgeChange`,
